@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F6F1E7">
+<title>Welcome to EcoBite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="eco-motion.css">
+<style>
+  :root{
+    --ink:#15231A; --ink-soft:#3B4E40; --paper:#F2EFE2; --paper-light:#F6F1E7;
+    --surface:#FFFDF6; --sage:#E1F0D8; --sage-strong:#D2E8C6;
+    --leaf:#4F9A52; --leaf-bright:#72AA3F; --orange:#F2994A; --orange-deep:#D9782E;
+    --line:rgba(21,35,26,.15); --muted:rgba(21,35,26,.62); --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  body{ margin:0; background:linear-gradient(180deg,var(--paper-light) 0%,var(--paper) 62%,#EAE5D2 100%); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  .eco-wrap{ width:min(100%,1024px); margin:0 auto; padding:24px 28px 40px; position:relative; }
+  .eco-topbar{ display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:18px; }
+  .eco-brand{ display:inline-flex; align-items:center; gap:9px; }
+  .eco-brand img{ width:30px; height:30px; object-fit:contain; }
+  .eco-brand span{ font-family:'Fraunces',serif; font-weight:600; font-size:18px; letter-spacing:-.02em; }
+  .eco-top-meta{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+  .eco-top-label{ font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+  .eco-top-status{ display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid rgba(79,154,82,.24); border-radius:999px; background:rgba(225,240,216,.6); font-size:11px; font-weight:700; color:var(--leaf); }
+  .eco-top-status i{ width:6px; height:6px; border-radius:50%; background:var(--leaf); }
+  .story-field{ position:relative; }
+  .route-arc{ position:absolute; z-index:0; inset:-76px -40px auto -40px; width:calc(100% + 80px); height:510px; pointer-events:none; overflow:visible; }
+  .route-arc path{ fill:none; stroke:var(--leaf); stroke-width:1.25; stroke-linecap:round; stroke-dasharray:950; stroke-dashoffset:950; opacity:.23; animation:ecoDraw 1.25s var(--ease) .34s forwards; }
+  .route-arc circle{ fill:var(--orange); opacity:0; animation:arcNode .35s var(--ease) 1.25s both; }
+  @keyframes arcNode{ from{opacity:0; transform:scale(.5);} to{opacity:.35; transform:scale(1);} }
+  .story-grid{ display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:18px; position:relative; z-index:1; }
+  .paper-panel,.receipt-panel{ position:relative; border:1px solid var(--line); border-radius:27px; overflow:hidden; box-shadow:0 24px 60px -42px rgba(21,35,26,.58); }
+  .field-note{ min-height:640px; padding:30px 30px 24px; background:rgba(246,241,231,.94); display:flex; flex-direction:column; }
+  .receipt-panel{ min-height:640px; padding:27px; background:rgba(255,253,246,.95); }
+  .paper-panel::before{ content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(120deg,rgba(255,255,255,.42),transparent 38%,rgba(114,170,63,.05)); }
+  .receipt-panel::before{ content:""; position:absolute; right:-84px; top:-84px; width:240px; height:240px; border:1px solid rgba(79,154,82,.12); border-radius:50%; pointer-events:none; }
+  .note-top,.receipt-kicker-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; position:relative; z-index:1; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; color:var(--leaf); font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+  .eyebrow::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 4px rgba(242,153,74,.13); }
+  .note-id{ font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(21,35,26,.42); font-variant-numeric:tabular-nums; }
+  .brand-lock{ display:flex; align-items:center; gap:12px; margin:30px 0 21px; position:relative; z-index:1; }
+  .logo-stage{ position:relative; width:56px; height:56px; display:grid; place-items:center; animation:leafSway .9s var(--ease) .1s both; }
+  .logo-stage img{ width:52px; height:52px; object-fit:contain; position:relative; z-index:2; }
+  .logo-stage::after{ content:""; position:absolute; z-index:1; bottom:6px; left:14px; width:28px; height:0; border-radius:99px; background:linear-gradient(90deg,rgba(242,153,74,.58),rgba(114,170,63,.58)); animation:bowlFill .75s var(--ease) .44s both; }
+  @keyframes leafSway{ 0%{opacity:0; transform:translateY(8px) rotate(-5deg);} 65%{opacity:1; transform:translateY(-1px) rotate(3deg);} 100%{opacity:1; transform:none;} }
+  @keyframes bowlFill{ from{height:0; opacity:0;} to{height:10px; opacity:.72;} }
+  .wordmark{ height:38px; width:auto; object-fit:contain; animation:riseIn .55s var(--ease) .22s both; }
+  @keyframes riseIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+  .role-line{ display:flex; align-items:center; gap:12px; margin:5px 0 25px; position:relative; z-index:1; }
+  .role-badge{ width:48px; height:48px; display:grid; place-items:center; border-radius:50%; background:var(--sage); border:1px solid rgba(79,154,82,.2); font-size:20px; line-height:1; box-shadow:0 8px 18px -15px rgba(79,154,82,.8); animation:roleSettle .55s var(--ease) .52s both; }
+  @keyframes roleSettle{ from{opacity:0; transform:scale(.88);} to{opacity:1; transform:scale(1);} }
+  .role-copy strong{ display:block; font-size:12px; line-height:1.35; }
+  .role-copy span{ display:block; margin-top:3px; color:var(--muted); font-size:11px; }
+  .field-note h1{ margin:0; max-width:9ch; font-family:'DM Serif Display',serif; font-size:clamp(34px,4.1vw,48px); font-weight:400; line-height:.98; letter-spacing:-.03em; position:relative; z-index:1; }
+  .phrase{ display:inline-block; opacity:0; transform:translateY(14px); animation:phraseReveal .6s var(--ease) both; }
+  .phrase:nth-child(3){ animation-delay:.12s; }
+  @keyframes phraseReveal{ from{opacity:0; transform:translateY(14px); filter:blur(2px);} to{opacity:1; transform:none; filter:none;} }
+  .note-message{ margin:21px 0 0; max-width:34ch; color:var(--ink-soft); font-size:14px; line-height:1.65; position:relative; z-index:1; min-height:3.4em; }
+  .quote-rule{ height:1px; background:linear-gradient(90deg,var(--leaf),rgba(79,154,82,0)); margin:26px 0 18px; position:relative; z-index:1; opacity:0; animation:fadeIn .55s ease 1s both; }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .quote{ display:flex; gap:10px; align-items:flex-start; max-width:31ch; color:var(--ink-soft); font-family:'Fraunces',serif; font-size:16px; line-height:1.4; font-style:italic; position:relative; z-index:1; opacity:0; animation:riseIn .55s var(--ease) 1.05s both; }
+  .quote-mark{ font-family:'DM Serif Display',serif; color:var(--orange); font-size:27px; line-height:.8; font-style:normal; }
+  .note-route{ display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:27px; position:relative; z-index:1; }
+  .route-stem{ height:1px; flex:1; background:linear-gradient(90deg,var(--leaf),rgba(79,154,82,.18)); position:relative; overflow:hidden; }
+  .route-stem::after{ content:""; position:absolute; inset:0; background:var(--orange); transform:scaleX(0); transform-origin:left; animation:ecoFill .5s var(--ease) 1.3s forwards; }
+  .note-node{ width:12px; height:12px; border-radius:50%; border:2px solid var(--leaf); background:var(--sage); flex:none; }
+  .note-node.active{ background:var(--orange); border-color:var(--orange); box-shadow:0 0 0 5px rgba(242,153,74,.13); }
+  .note-route-label{ font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+  .primary-cta{ display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px; width:max-content; margin-top:18px; padding:12px 18px; border:1px solid rgba(217,120,46,.16); border-radius:999px; background:var(--orange); color:#241004; font-size:13px; font-weight:800; box-shadow:0 15px 26px -17px rgba(217,120,46,.95); position:relative; z-index:1; overflow:hidden; animation:ctaBloom .8s var(--ease) 1.4s both; transition:transform .2s var(--ease),background .2s ease,box-shadow .25s ease; }
+  .primary-cta:hover{ transform:translateY(-2px) scale(1.015); background:var(--orange-deep); box-shadow:0 19px 30px -16px rgba(217,120,46,.9); }
+  .primary-cta:active{ transform:translateY(1px) scale(.98); }
+  .primary-cta svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  @keyframes ctaBloom{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+  .note-footer{ display:flex; justify-content:space-between; gap:12px; margin-top:20px; padding-top:13px; border-top:1px solid var(--line); color:rgba(21,35,26,.48); font-size:10px; position:relative; z-index:1; }
+  .leaf-settlement{ position:absolute; right:26px; bottom:70px; width:92px; height:80px; pointer-events:none; z-index:1; }
+  .leaf-settlement .eco-leaf:nth-child(1){ left:12px; top:2px; background:var(--leaf-bright); animation-delay:1.4s; }
+  .leaf-settlement .eco-leaf:nth-child(2){ left:43px; top:15px; background:var(--leaf); animation-delay:1.55s; transform:rotate(35deg) scale(.84); }
+  .leaf-settlement .eco-leaf:nth-child(3){ left:66px; top:0; background:var(--sage-strong); animation-delay:1.7s; transform:rotate(62deg) scale(.72); }
+  /* live handoff panel */
+  .receipt-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; position:relative; z-index:1; }
+  .receipt-header h2{ margin:11px 0 5px; font-family:'Fraunces',serif; font-weight:600; font-size:clamp(26px,3vw,34px); line-height:1.05; letter-spacing:-.03em; }
+  .receipt-header p{ margin:0; color:var(--muted); font-size:11px; }
+  .live-pill{ display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border-radius:999px; background:rgba(225,240,216,.8); color:var(--leaf); font-size:10px; font-weight:800; white-space:nowrap; }
+  .live-pill i{ width:6px; height:6px; border-radius:50%; background:var(--leaf); animation:ecoPulse 1.8s ease-in-out infinite; }
+  .handoff-ladder{ display:grid; gap:0; margin:26px 0 20px; padding-left:3px; position:relative; z-index:1; }
+  .ladder-item{ display:grid; grid-template-columns:25px 1fr; gap:11px; min-height:55px; position:relative; }
+  .ladder-item:not(:last-child)::before{ content:""; position:absolute; left:11px; top:24px; bottom:0; width:2px; background:rgba(21,35,26,.14); }
+  .ladder-item.done:not(:last-child)::before{ background:var(--leaf); }
+  .ladder-item.active:not(:last-child)::before{ background:linear-gradient(180deg,var(--orange),rgba(21,35,26,.14)); }
+  .ladder-node{ width:23px; height:23px; display:grid; place-items:center; border-radius:50%; border:2px solid rgba(21,35,26,.22); background:var(--paper-light); color:transparent; font-size:12px; font-weight:900; position:relative; z-index:1; }
+  .ladder-item.done .ladder-node{ background:var(--leaf); border-color:var(--leaf); color:var(--paper-light); animation:checkResolve .35s var(--ease) .9s both; }
+  @keyframes checkResolve{ from{transform:scale(.78);} 65%{transform:scale(1.08);} to{transform:scale(1);} }
+  .ladder-item.active .ladder-node{ background:var(--orange); border-color:var(--orange); box-shadow:0 0 0 5px rgba(242,153,74,.14); animation:checkResolve .5s var(--ease) 1.1s both; }
+  .ladder-copy strong{ display:block; font-size:12px; line-height:1.3; }
+  .ladder-copy span{ display:block; margin-top:3px; color:var(--muted); font-size:10px; line-height:1.35; }
+  .ladder-item.pending .ladder-copy strong{ color:rgba(21,35,26,.48); }
+  .map-card{ position:relative; z-index:1; border:1px solid var(--line); border-radius:19px; background:var(--sage); overflow:hidden; }
+  .map-card-head{ display:flex; justify-content:space-between; gap:10px; align-items:center; padding:11px 13px 9px; border-bottom:1px solid rgba(21,35,26,.1); font-size:9px; font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-soft); }
+  .map-card-head span:last-child{ font-weight:600; letter-spacing:.03em; text-transform:none; color:rgba(21,35,26,.5); }
+  .map-visual{ height:176px; position:relative; overflow:hidden; background:linear-gradient(145deg,#DCECCF,#EAF1DD); }
+  .map-visual::before{ content:""; position:absolute; inset:0; opacity:.45; background-image:linear-gradient(31deg,transparent 46%,rgba(79,154,82,.14) 47%,transparent 49%),linear-gradient(120deg,transparent 58%,rgba(21,35,26,.11) 59%,transparent 60%),linear-gradient(176deg,transparent 34%,rgba(242,153,74,.1) 35%,transparent 37%); background-size:180px 120px,220px 150px,260px 130px; }
+  .map-visual svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .planned-route{ fill:none; stroke:var(--leaf); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; opacity:.9; }
+  .actual-trail{ fill:none; stroke:var(--orange); stroke-width:3; stroke-linecap:round; stroke-dasharray:3 8; opacity:.95; animation:trailReveal .75s var(--ease) 1.1s both; }
+  @keyframes trailReveal{ from{stroke-dashoffset:90; opacity:.2;} to{stroke-dashoffset:0; opacity:.95;} }
+  .map-road{ fill:none; stroke:rgba(21,35,26,.16); stroke-width:1.3; stroke-linecap:round; }
+  .map-road.alt{ stroke:rgba(255,253,246,.78); stroke-width:5; }
+  .map-pin{ position:absolute; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:9px; font-weight:800; color:var(--ink-soft); animation:pinDropSoft .55s var(--ease) both; }
+  @keyframes pinDropSoft{ 0%{opacity:0; transform:translateY(-16px) scale(.88);} 70%{opacity:1; transform:translateY(2px) scale(1.02);} 100%{opacity:1; transform:none;} }
+  .map-pin b{ display:grid; place-items:center; width:26px; height:26px; border-radius:50% 50% 50% 4px; transform:rotate(-45deg); box-shadow:0 7px 12px -8px rgba(21,35,26,.75); }
+  .map-pin b span{ transform:rotate(45deg); font-size:10px; }
+  .map-pin.pickup{ left:12%; top:22%; animation-delay:.75s; }
+  .map-pin.pickup b{ background:var(--surface); border:2px solid var(--leaf); color:var(--leaf); }
+  .map-pin.drop{ right:10%; bottom:18%; animation-delay:.9s; }
+  .map-pin.drop b{ background:var(--surface); border:2px solid var(--orange); color:var(--orange-deep); }
+  .map-driver{ position:absolute; left:54%; top:48%; display:grid; place-items:center; width:32px; height:32px; border-radius:50%; background:var(--surface); border:2px solid var(--orange); box-shadow:0 8px 16px -9px rgba(21,35,26,.85); color:var(--orange-deep); font-size:12px; animation:driverGlide 2.4s var(--ease) 1.1s infinite alternate; }
+  .map-driver::before{ content:""; position:absolute; inset:-6px; border:1px solid rgba(242,153,74,.32); border-radius:50%; animation:ecoPulse 1.8s ease-in-out infinite; }
+  @keyframes driverGlide{ 0%{transform:translate(-24px,14px);} 45%{transform:translate(-6px,-5px);} 100%{transform:translate(13px,8px);} }
+  .route-caption{ display:flex; justify-content:space-between; gap:10px; padding:9px 13px; background:rgba(255,253,246,.62); font-size:10px; color:var(--muted); }
+  .route-caption strong{ color:var(--ink); font-weight:800; }
+  .receipt-meta{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:13px; position:relative; z-index:1; }
+  .meta-cell{ padding:12px 13px; border-top:1px solid var(--line); }
+  .meta-cell span{ display:block; font-size:9px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); }
+  .meta-cell strong{ display:block; margin-top:5px; font-family:'Fraunces',serif; font-size:14px; line-height:1.15; }
+  .meta-cell small{ display:block; margin-top:4px; color:var(--muted); font-size:10px; }
+  .receipt-foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:5px; padding-top:13px; border-top:1px solid var(--line); position:relative; z-index:1; }
+  .distance-line{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px; font-size:10px; color:var(--muted); }
+  .distance-line strong{ font-family:'Fraunces',serif; font-size:18px; color:var(--ink); }
+  .close-action{ min-height:40px; padding:9px 13px; border:1px solid var(--line); border-radius:999px; background:rgba(255,253,246,.6); color:var(--ink); font-size:11px; font-weight:800; cursor:pointer; font:inherit; transition:transform .2s var(--ease),border-color .2s ease,background .2s ease; }
+  .close-action:hover{ transform:translateY(-2px); border-color:var(--leaf); background:var(--surface); }
+  @media (max-width:760px){
+    .eco-wrap{ padding:18px 16px 30px; }
+    .eco-top-label{ display:none; }
+    .story-grid{ grid-template-columns:1fr; }
+    .field-note,.receipt-panel{ min-height:0; }
+    .field-note{ padding:25px 22px 21px; }
+    .receipt-panel{ padding:22px; }
+    .route-arc{ inset:-30px -150px auto -150px; height:680px; opacity:.7; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .route-arc path{ stroke-dashoffset:0; } .route-arc circle{ opacity:.35; }
+    .phrase,.quote,.quote-rule{ opacity:1; transform:none; filter:none; animation:none; }
+    .primary-cta{ opacity:1; transform:none; animation:none; }
+    .leaf-settlement .eco-leaf{ opacity:0; animation:none; }
+    .map-pin{ opacity:1; transform:none; animation:none; }
+    .map-driver{ transform:translate(13px,8px); animation:none; }
+    .actual-trail{ stroke-dashoffset:0; opacity:.95; animation:none; }
+    .logo-stage,.logo-stage::after,.wordmark,.role-badge{ animation:none; opacity:1; }
+  }
+</style>
+</head>
+<body>
+<div class="eco-wrap">
+  <header class="eco-topbar">
+    <a class="eco-brand" href="index.html" aria-label="EcoBite home">
+      <img src="logo-icon.webp" alt=""><span>ecobite</span>
+    </a>
+    <div class="eco-top-meta">
+      <span class="eco-top-label">Confirmation → live handoff</span>
+      <span class="eco-top-status"><i></i>Food in motion</span>
+    </div>
+  </header>
+
+  <main aria-label="EcoBite confirmation" class="story-field">
+    <svg aria-hidden="true" class="route-arc" preserveAspectRatio="none" viewBox="0 0 1080 510">
+      <path d="M58 52 C182 5 196 164 324 160 C447 156 460 27 595 92 C730 158 723 345 861 330 C934 322 972 382 1014 447"></path>
+      <circle cx="1014" cy="447" r="5"></circle>
+    </svg>
+
+    <div class="story-grid">
+      <!-- Field note: role-aware welcome -->
+      <section class="paper-panel field-note" aria-labelledby="welcome-title">
+        <div class="note-top">
+          <span class="eyebrow">Account confirmed</span>
+          <span class="note-id">Field note 01</span>
+        </div>
+        <div class="brand-lock">
+          <span class="logo-stage"><img src="logo-icon.webp" alt="EcoBite bowl mark"></span>
+          <img src="logo-wordmark.webp" alt="EcoBite" class="wordmark">
+        </div>
+        <div class="role-line">
+          <span class="role-badge" id="roleEmoji" aria-hidden="true">🌱</span>
+          <span class="role-copy">
+            <strong id="roleName">EcoBite member</strong>
+            <span>Role-aware welcome · account ready</span>
+          </span>
+        </div>
+        <h1 id="welcome-title"><span class="phrase">Welcome</span><br><span class="phrase">to EcoBite</span></h1>
+        <p class="note-message" aria-live="polite"><span id="welcomeMessage" data-type></span></p>
+        <div class="quote-rule"></div>
+        <p class="quote"><span class="quote-mark">“</span><span id="roleQuote">Good food belongs on tables, not in bins.</span></p>
+        <div class="note-route" aria-label="Account to home route">
+          <span class="note-node active"></span>
+          <span class="route-stem"></span>
+          <span class="note-node"></span>
+          <span class="note-route-label">Next stop · Home</span>
+        </div>
+        <a class="primary-cta" href="home.html">Go to Home
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+        </a>
+        <div class="leaf-settlement" aria-hidden="true">
+          <i class="eco-leaf"></i><i class="eco-leaf"></i><i class="eco-leaf"></i>
+        </div>
+        <div class="note-footer">
+          <span>Role message resolves from your profile</span>
+          <span>EcoBite · 2026</span>
+        </div>
+      </section>
+
+      <!-- Live handoff preview -->
+      <section class="receipt-panel" aria-labelledby="handoff-title">
+        <div class="receipt-kicker-row">
+          <span class="eyebrow">Live handoff</span>
+          <span class="note-id">Run #418</span>
+        </div>
+        <div class="receipt-header">
+          <div>
+            <h2 id="handoff-title">Arriving in 12 min</h2>
+            <p>Updated just now · GPS signal received 4 min ago</p>
+          </div>
+          <span class="live-pill"><i></i>Live route</span>
+        </div>
+        <div class="handoff-ladder" aria-label="Delivery progress">
+          <div class="ladder-item done">
+            <div class="ladder-node">✓</div>
+            <div class="ladder-copy"><strong>Driver assigned</strong><span>A volunteer has accepted this delivery.</span></div>
+          </div>
+          <div class="ladder-item active">
+            <div class="ladder-node"></div>
+            <div class="ladder-copy"><strong>Food picked up</strong><span>On the way to the drop-off point.</span></div>
+          </div>
+          <div class="ladder-item pending">
+            <div class="ladder-node"></div>
+            <div class="ladder-copy"><strong>Delivered</strong><span>The food reaches the receiver.</span></div>
+          </div>
+        </div>
+        <div class="map-card" aria-label="Pickup to drop-off route preview">
+          <div class="map-card-head"><span>Tracking map</span><span>Actual GPS trail · live</span></div>
+          <div class="map-visual">
+            <svg aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 600 210">
+              <path class="map-road alt" d="M-20 178 C100 130 94 46 224 70 S362 185 492 124 S582 26 628 42"></path>
+              <path class="map-road" d="M-20 177 C100 130 94 46 224 70 S362 185 492 124 S582 26 628 42"></path>
+              <path class="map-road" d="M61 -10 C108 41 174 38 218 78 S299 162 344 220"></path>
+              <path class="map-road" d="M404 -16 C384 43 420 70 488 89 S561 150 618 224"></path>
+              <path class="planned-route" d="M74 61 C162 51 178 90 260 110 S381 126 520 169"></path>
+              <path class="actual-trail" d="M74 61 C153 55 183 90 255 109 S337 120 397 133"></path>
+            </svg>
+            <span class="map-pin pickup"><b><span>P</span></b><span>Pickup</span></span>
+            <span class="map-driver" aria-label="Driver marker">↗</span>
+            <span class="map-pin drop"><b><span>D</span></b><span>Drop-off</span></span>
+          </div>
+          <div class="route-caption">
+            <span><strong>Green Grocer Market</strong> → Eastside Community Fridge</span>
+            <span>5.8 km planned</span>
+          </div>
+        </div>
+        <div class="receipt-meta">
+          <div class="meta-cell"><span>Pickup</span><strong>Green Grocer Market</strong><small>2.4 km from current route</small></div>
+          <div class="meta-cell"><span>Drop-off</span><strong>Eastside Community Fridge</strong><small>Chilled + dry goods accepted</small></div>
+        </div>
+        <div class="receipt-foot">
+          <div class="distance-line"><span>Planned run</span><strong>5.8 km</strong><span>· about 24 min drive</span></div>
+          <button class="close-action" type="button" onclick="location.href='home.html?view=routing'">Open live tracking</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
+<script src="eco-motion.js"></script>
+<script>
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    let name = 'friend', role = null;
+    if (session) {
+      const { data: profile } = await sb.from('profiles').select('full_name, role').eq('id', session.user.id).maybeSingle();
+      name = profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'friend';
+      role = profile?.role;
+    }
+    const welcome = {
+      donor:  { emoji: '🥕', name: 'Food donor',            message: `Thank you, ${name}, for joining EcoBite. Your surplus can become someone's next good meal.`, quote: 'Every donation turns care into nourishment.' },
+      org:    { emoji: '🤝', name: 'Receiving organisation', message: `Thank you, ${name}, for joining EcoBite. You are ready to connect good food with your community.`, quote: 'A stronger community begins at a shared table.' },
+      driver: { emoji: '🛵', name: 'Volunteer driver',      message: `Thank you, ${name}, for joining EcoBite. You are ready to help good food reach the people who need it.`, quote: 'A small journey can make a meaningful difference.' }
+    }[role] || { emoji: '🌱', name: 'EcoBite member', message: `Thank you, ${name}, for joining EcoBite. Your account is confirmed and ready to help move good food where it is needed.`, quote: 'Good food belongs on tables, not in bins.' };
+
+    document.getElementById('roleEmoji').textContent = welcome.emoji;
+    document.getElementById('roleName').textContent = welcome.name;
+    document.getElementById('roleQuote').textContent = `“${welcome.quote}”`;
+    // Type the role-aware welcome character by character.
+    const msgEl = document.getElementById('welcomeMessage');
+    msgEl.removeAttribute('data-type');
+    if (window.EcoMotion && !EcoMotion.reduced) {
+      msgEl.textContent = '';
+      await EcoMotion.type(msgEl, welcome.message, 20);
+    } else {
+      msgEl.textContent = welcome.message;
+    }
+  })();
+</script>
+</body>
+</html>

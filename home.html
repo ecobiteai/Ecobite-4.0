@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoBite — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="eco-motion.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  body.app-page{background:var(--paper);overflow-x:hidden;}
+  .app-shell{min-height:100vh;display:grid;grid-template-columns:264px minmax(0,1fr);}
+  .sidebar{position:sticky;top:0;height:100vh;z-index:60;display:flex;flex-direction:column;padding:24px 18px;background:var(--bg-deep);color:var(--paper);overflow-y:auto;}
+  .sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 10px;text-decoration:none;}
+  .sidebar-brand img{width:30px;height:30px;}
+  .sidebar-brand span{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;}
+  .sidebar-city{margin:30px 10px 18px;color:rgba(242,239,226,.5);font-size:.78rem;letter-spacing:.03em;}
+  .side-section{margin-top:20px;}
+  .side-label{display:block;padding:0 12px 7px;color:rgba(242,239,226,.42);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
+  .side-nav{position:relative;display:grid;gap:3px;}
+  .side-nav::before{content:"";position:absolute;left:17px;top:10px;bottom:10px;width:1px;background:rgba(242,239,226,.14);}
+  .side-link{position:relative;display:flex;align-items:center;gap:11px;width:100%;min-height:42px;padding:8px 10px 8px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:rgba(242,239,226,.68);font-size:.86rem;text-align:left;transition:background .22s ease,color .22s ease,transform .22s var(--ease);}
+  .side-link:hover{color:var(--paper);background:rgba(242,239,226,.08);transform:translateX(2px);}
+  .side-link[aria-current="page"]{color:var(--paper);background:rgba(210,232,198,.16);border-color:rgba(139,195,74,.18);}
+  .side-link .node{position:relative;z-index:1;width:11px;height:11px;flex:none;border:2px solid rgba(242,239,226,.35);border-radius:50%;background:var(--bg-deep);transition:background .25s ease,border-color .25s ease,box-shadow .25s ease,transform .25s var(--ease);}
+  .side-link[aria-current="page"] .node{background:var(--leaf-bright);border-color:var(--leaf-bright);box-shadow:0 0 0 4px rgba(139,195,74,.14);transform:scale(1.1);}
+  .side-link[data-alert="true"] .node{background:var(--orange);border-color:var(--orange);}
+  .side-link svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.9;}
+  .sidebar-footer{margin-top:auto;padding-top:24px;border-top:1px solid rgba(242,239,226,.14);display:grid;gap:4px;}
+  .sidebar-footer .side-link{font-size:.82rem;}
+  .account-mini{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px;border-radius:12px;background:rgba(242,239,226,.07);color:var(--paper);}
+  .avatar{width:32px;height:32px;display:grid;place-items:center;flex:none;border-radius:50%;background:linear-gradient(140deg,var(--leaf-bright),var(--leaf));color:#10230F;font-weight:800;font-size:.8rem;}
+  .account-mini strong{display:block;font-size:.8rem;line-height:1.2;}
+  .account-mini small{display:block;margin-top:2px;color:rgba(242,239,226,.5);font-size:.7rem;}
+  .app-main{min-width:0;}
+  .app-mobile-bar{display:none;}
+  .app-topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:18px;min-height:78px;padding:15px clamp(20px,4vw,46px);background:rgba(242,239,226,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .search-wrap{position:relative;flex:1;max-width:640px;}
+  .search-wrap>svg{position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);fill:none;stroke:var(--ink-soft);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;}
+  .search-wrap input{min-height:44px;padding-left:42px;padding-right:56px;border-radius:999px;background:rgba(255,253,246,.72);}
+  .search-shortcut{position:absolute;right:13px;top:50%;transform:translateY(-50%);padding:2px 7px;border:1px solid var(--line);border-radius:6px;color:var(--text-faint);font-size:.7rem;}
+  .search-results{position:absolute;left:0;right:0;top:calc(100% + 9px);display:none;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);}
+  .search-results.show{display:block;animation:popIn .25s var(--ease) both;}
+  .search-group{padding:5px 0 9px;}
+  .search-group+.search-group{border-top:1px solid var(--line);}
+  .search-group>strong{display:block;padding:4px 10px;color:var(--text-faint);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;}
+  .search-result{display:flex;width:100%;gap:10px;padding:9px 10px;border:0;border-radius:10px;background:transparent;color:var(--ink);text-align:left;transition:background .18s ease;}
+  .search-result:hover,.search-result:focus-visible{background:var(--sage);outline:0;}
+  .search-result strong{display:block;font-size:.86rem;}
+  .search-result span{display:block;color:var(--text-faint);font-size:.76rem;}
+  .top-context{display:flex;align-items:center;gap:12px;margin-left:auto;}
+  .top-context small{color:var(--text-faint);font-size:.78rem;}
+  .top-account{display:flex;align-items:center;gap:9px;white-space:nowrap;}
+  .top-account .avatar{width:34px;height:34px;}
+  .top-account strong{display:block;font-size:.8rem;line-height:1.2;}
+  .top-account small{display:block;margin-top:2px;color:var(--text-faint);font-size:.7rem;}
+  .app-content{max-width:1400px;margin:0 auto;padding:0 clamp(20px,4vw,52px) 64px;}
+  .greeting{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:50px 0 28px;}
+  .greeting h1{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:8px;}
+  .greeting p{max-width:62ch;color:var(--ink-soft);}
+  .greeting-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px;color:var(--text-faint);font-size:.86rem;}
+  .ai-quote-label{display:block;color:var(--leaf);font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
+  .ai-quote{display:flex;align-items:center;flex-wrap:wrap;gap:7px;min-height:1.5em;max-width:62ch;color:var(--ink-soft);font-family:'Fraunces',serif;font-size:1.05rem;font-style:italic;}
+  .ai-quote-icon{flex:none;font-style:normal;font-size:.95em;}
+  .ai-caret{display:inline-block;width:2px;height:1.05em;background:var(--leaf);vertical-align:-3px;animation:aiCaretBlink 1s steps(1,end) infinite;}
+  .ai-caret.done{opacity:0;transition:opacity .5s ease .2s;}
+  @keyframes aiCaretBlink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  @media (prefers-reduced-motion:reduce){ .ai-caret{animation:none;opacity:0;} }
+
+  /* ---------- Ambient animated backdrop for the app shell ---------- */
+  .app-content{position:relative;}
+  .app-content::before{content:"";position:fixed;z-index:-1;inset:0;pointer-events:none;background:
+    radial-gradient(560px circle at 6% 0%, rgba(114,170,63,.10), transparent 60%),
+    radial-gradient(480px circle at 98% 14%, rgba(242,153,74,.09), transparent 55%);}
+  .greeting{position:relative;}
+  .greeting::before{content:"";position:absolute;z-index:-1;right:-30px;top:-34px;width:200px;height:200px;border:1px solid rgba(79,154,82,.16);border-radius:50%;animation:greetOrbit 22s ease-in-out infinite alternate;}
+  @keyframes greetOrbit{from{transform:rotate(-8deg) translate3d(0,0,0);}to{transform:rotate(8deg) translate3d(-1.4vw,-1.1vh,0);}}
+
+  /* ---------- Predictive AI outlook card ---------- */
+  .predict-card{position:relative;overflow:hidden;padding:22px 22px 20px;border-radius:20px;background:linear-gradient(160deg,var(--bg-deep) 0%,var(--bg-deep-3) 100%);color:var(--paper);box-shadow:0 22px 50px -34px rgba(21,35,26,.7);transition:transform .3s var(--ease),box-shadow .3s ease;}
+  .predict-card:hover{transform:translateY(-4px);box-shadow:0 28px 60px -32px rgba(21,35,26,.8);}
+  .predict-card::before{content:"";position:absolute;inset:-40% -10% auto auto;width:220px;height:220px;background:radial-gradient(circle,rgba(139,195,74,.35),transparent 70%);animation:predictGlow 6s ease-in-out infinite;pointer-events:none;}
+  @keyframes predictGlow{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.12);}}
+  .predict-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:relative;}
+  .predict-label{display:flex;align-items:center;gap:7px;color:var(--leaf-bright);font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+  .predict-dot{width:7px;height:7px;border-radius:50%;background:var(--leaf-bright);box-shadow:0 0 0 4px rgba(139,195,74,.22);animation:predictPulse 1.8s ease-in-out infinite;}
+  @keyframes predictPulse{0%,100%{box-shadow:0 0 0 4px rgba(139,195,74,.22);}50%{box-shadow:0 0 0 8px rgba(139,195,74,.05);}}
+  .predict-range{display:flex;align-items:baseline;gap:10px;margin:15px 0 3px;position:relative;}
+  .predict-count{font-family:'Fraunces',serif;font-size:clamp(2.2rem,5vw,3.1rem);line-height:1;}
+  .predict-count small{font-family:'Inter',sans-serif;font-size:.34em;color:rgba(242,239,226,.6);margin-left:7px;font-weight:600;}
+  .predict-headline{margin-top:7px;font-family:'Fraunces',serif;font-size:1.06rem;position:relative;}
+  .predict-reason{margin-top:6px;color:rgba(242,239,226,.68);font-size:.83rem;line-height:1.55;position:relative;}
+  .predict-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px;position:relative;}
+  .predict-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(242,239,226,.09);border:1px solid rgba(242,239,226,.14);font-size:.74rem;color:rgba(242,239,226,.85);transition:background .2s ease,transform .2s var(--ease);}
+  .predict-badge:hover{background:rgba(242,239,226,.16);transform:translateY(-1px);}
+  .predict-meter{height:5px;margin-top:16px;border-radius:5px;background:rgba(242,239,226,.14);overflow:hidden;position:relative;}
+  .predict-meter i{display:block;height:100%;width:0%;border-radius:inherit;background:linear-gradient(90deg,var(--leaf-bright),var(--orange));transition:width 1.1s var(--ease);}
+  .predict-meter-label{display:flex;justify-content:space-between;margin-top:6px;color:rgba(242,239,226,.5);font-size:.68rem;}
+  @media (prefers-reduced-motion:reduce){
+    .predict-card::before,.predict-dot,.greeting::before{animation:none;}
+    .predict-card:hover,.predict-badge:hover{transform:none;}
+  }
+  .impact-ledger{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;margin-bottom:30px;border:1px solid var(--line-strong);border-radius:18px;background:var(--surface);box-shadow:0 16px 40px -36px rgba(21,35,26,.6);}
+  .impact-cell{padding:20px 22px;border-right:1px solid var(--line);}
+  .impact-cell:last-child{border-right:0;}
+  .impact-cell strong{display:block;font-family:'Fraunces',serif;font-size:clamp(1.5rem,2.5vw,2.1rem);line-height:1.05;}
+  .impact-cell strong small{font-family:'Inter',sans-serif;font-size:.48em;color:var(--text-soft);margin-left:4px;}
+  .impact-cell span{display:block;margin-top:7px;color:var(--text-faint);font-size:.78rem;}
+  .home-grid{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(300px,.82fr);gap:26px;align-items:start;}
+  .home-primary,.home-secondary{display:grid;gap:26px;min-width:0;}
+  .sheet{padding:24px;background:rgba(255,253,246,.72);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 45px -40px rgba(21,35,26,.55);}
+  .sheet.sage{background:var(--sage);}
+  .sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px;}
+  .sheet-head h2{font-size:1.25rem;}
+  .sheet-head p{margin-top:5px;color:var(--text-faint);font-size:.83rem;}
+  .filter-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:17px;}
+  .filter-tab{min-height:34px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink-soft);font-size:.76rem;font-weight:700;transition:background .2s ease,border-color .2s ease,color .2s ease;}
+  .filter-tab:hover,.filter-tab.on{background:var(--sage-strong);border-color:var(--leaf);color:var(--ink);}
+  .offer-list{display:grid;}
+  .offer-row{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto auto;gap:14px;align-items:center;padding:16px 0;border-top:1px solid var(--line);transition:background .25s ease,transform .25s var(--ease);}
+  .offer-row:first-child{border-top:0;}
+  .offer-row:hover{background:rgba(225,240,216,.45);transform:translateX(3px);}
+  .offer-row.urgent{border-top-color:rgba(225,87,63,.26);}
+  .category-dot{width:10px;height:10px;border-radius:50%;background:var(--leaf);}
+  .category-dot.prepared{background:var(--orange);}
+  .category-dot.bakery{background:#A59A78;}
+  .category-dot.chilled{background:var(--aqua);}
+  .offer-row h3{font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;line-height:1.3;}
+  .offer-row .where{display:block;margin-top:3px;color:var(--text-faint);font-size:.76rem;}
+  .offer-qty{text-align:right;color:var(--text-soft);font-size:.78rem;white-space:nowrap;}
+  .offer-qty strong{display:block;color:var(--ink);font-size:.9rem;}
+  .time-chip{padding:6px 9px;border-radius:999px;background:rgba(21,35,26,.07);color:var(--ink-soft);font-size:.72rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .time-chip.warm{background:rgba(242,153,74,.16);color:var(--orange-deep);}
+  .time-chip.urgent{background:rgba(225,87,63,.14);color:#B94735;animation:urgent 2.2s ease-in-out infinite;}
+  .offer-row.claimed{opacity:.66;}
+  .offer-row.claimed .offer-action{display:none;}
+  .claimed-state{display:none;color:var(--leaf);font-size:.78rem;font-weight:800;}
+  .offer-row.claimed .claimed-state{display:inline-flex;align-items:center;gap:5px;}
+  .offer-row.claimed .claimed-state::before{content:"✓";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(79,154,82,.14);}
+  .offer-action{min-height:34px;padding:6px 12px;font-size:.76rem;}
+  .empty-note{padding:28px 0;color:var(--text-faint);font-size:.86rem;}
+  .ai-stack{display:grid;gap:14px;}
+  .ai-note{position:relative;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;transition:transform .25s var(--ease),box-shadow .25s ease,border-color .25s ease;}
+  .ai-note:hover{transform:translateY(-4px);border-color:rgba(79,154,82,.45);box-shadow:0 18px 36px -30px rgba(21,35,26,.65);}
+  .ai-note.forecast{background:var(--sage);}
+  .ai-note.match{background:#F4F0E5;}
+  .ai-note.routing-note,.ai-note.route{display:block;background:var(--bg-deep);color:var(--paper);}
+  .ai-note .ai-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;color:var(--leaf);font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+  .ai-note.routing-note .ai-label,.ai-note.route .ai-label{color:var(--leaf-bright);}
+  .ai-note h3{font-family:'Fraunces',serif;font-size:1.2rem;margin-bottom:8px;}
+  .ai-note p{color:var(--text-soft);font-size:.82rem;line-height:1.5;}
+  .ai-note.routing-note p,.ai-note.route p{color:rgba(242,239,226,.7);}
+  .ai-note .ai-action{display:inline-flex;align-items:center;margin-top:15px;padding:0;border:0;background:none;color:var(--leaf);font-size:.78rem;font-weight:800;text-decoration:underline;text-underline-offset:3px;}
+  .ai-note .ai-action svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-left:5px;}
+  .ai-note.routing-note .ai-action,.ai-note.route .ai-action{color:var(--orange);}
+  .mini-bars{display:flex;align-items:flex-end;gap:5px;height:54px;margin:16px 0 4px;}
+  .mini-bars span{flex:1;height:var(--bar);min-height:8px;border-radius:4px 4px 2px 2px;background:var(--leaf);opacity:.7;}
+  .mini-bars span.peak{background:var(--orange);opacity:1;}
+  .mini-bars-labels{display:flex;gap:5px;color:var(--text-faint);font-size:.63rem;}
+  .mini-bars-labels span{flex:1;text-align:center;}
+  .match-route{display:flex;align-items:center;gap:7px;margin:14px 0;color:var(--ink-soft);font-size:.78rem;font-weight:700;}
+  .match-route i{width:8px;height:8px;border-radius:50%;background:var(--leaf);}
+  .match-route i:last-child{background:var(--orange);}
+  .match-route b{height:1px;flex:1;background:var(--line-strong);}
+  .ticket-route{display:flex;align-items:center;gap:6px;margin:15px 0 7px;}
+  .ticket-route i{width:9px;height:9px;border-radius:50%;background:var(--leaf-bright);}
+  .ticket-route i.current{background:var(--orange);box-shadow:0 0 0 4px rgba(242,153,74,.16);}
+  .ticket-route b{height:2px;flex:1;background:rgba(242,239,226,.24);}
+  .ticket-meta{display:flex;justify-content:space-between;color:rgba(242,239,226,.56);font-size:.68rem;}
+  .capacity-list{display:grid;}
+  .capacity-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:13px;padding:14px 0;border-top:1px solid var(--line);}
+  .capacity-row:first-child{border-top:0;}
+  .capacity-row strong{display:block;font-size:.84rem;}
+  .capacity-row span{display:block;margin-top:3px;color:var(--text-faint);font-size:.73rem;}
+  .capacity-value{text-align:right;color:var(--ink-soft);font-size:.76rem;font-weight:800;}
+  .meter{height:5px;margin-top:9px;border-radius:5px;background:rgba(21,35,26,.12);overflow:hidden;}
+  .meter i{display:block;height:100%;width:var(--capacity);border-radius:inherit;background:var(--leaf);}
+  .meter i.high{background:var(--orange);}
+  .meter i.full{background:var(--tomato);}
+
+  /* ---------- Secondary views ---------- */
+  .view-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:50px 0 28px;}
+  .view-intro h1{font-size:clamp(2rem,4vw,3rem);margin-bottom:8px;}
+  .view-intro p{max-width:62ch;color:var(--text-soft);}
+  .view-board{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:26px;align-items:start;}
+  .form-sheet{position:relative;overflow:hidden;max-width:780px;padding:30px 28px 28px;border-radius:20px;box-shadow:var(--shadow);
+    background:radial-gradient(rgba(21,35,26,.045) 1px, transparent 1px) 0 0/16px 16px, rgba(255,253,246,.86);
+    border:1px solid var(--line);transition:box-shadow .3s ease;}
+  .form-sheet:hover{box-shadow:0 30px 60px -34px rgba(21,35,26,.6);}
+  .form-sheet::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--leaf),var(--leaf-bright),var(--orange),var(--leaf));background-size:200% 100%;animation:sheetBarFlow 7s linear infinite;}
+  @keyframes sheetBarFlow{to{background-position:-200% 0;}}
+  .form-sheet h2{font-size:1.25rem;margin-bottom:6px;}
+  .form-sheet>p{color:var(--text-faint);font-size:.84rem;margin-bottom:22px;}
+  .category-picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;margin-bottom:20px;}
+  .category-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 8px;line-height:1.25;}
+  .category-choice b{font-size:1.15rem;line-height:1;}
+  .category-choice span{display:block;font-size:.76rem;}
+  @media (max-width:560px){ .category-picker{grid-template-columns:repeat(2,1fr);} }
+  .category-choice{position:relative;overflow:hidden;min-height:54px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.55);color:var(--ink-soft);font-size:.78rem;font-weight:800;transition:background .2s ease,border-color .2s ease,transform .2s var(--ease),box-shadow .2s ease;}
+  .category-choice::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,rgba(114,170,63,.35),transparent 65%);opacity:0;transform:scale(.5);transition:opacity .4s ease,transform .4s ease;pointer-events:none;}
+  .category-choice:hover{transform:translateY(-2px);border-color:var(--leaf);}
+  .category-choice.on{background:linear-gradient(135deg,var(--sage),rgba(242,153,74,.14));border-color:var(--leaf);color:var(--ink);transform:translateY(-2px);box-shadow:0 14px 26px -18px rgba(79,154,82,.65);animation:chipPop .35s var(--ease);}
+  .category-choice.on::before{opacity:1;transform:scale(1.3);}
+  @media (prefers-reduced-motion:reduce){
+    .form-sheet::before{animation:none;}
+    .category-choice.on{animation:none;}
+    .category-choice:hover,.form-sheet:hover{transform:none;}
+  }
+  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:var(--surface);}
+  .record-table{width:100%;border-collapse:collapse;min-width:680px;}
+  .record-table th,.record-table td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:.8rem;vertical-align:middle;}
+  .record-table th{color:var(--text-faint);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;}
+  .record-table tbody tr:last-child td{border-bottom:0;}
+  .record-table tbody tr:hover{background:var(--sage);}
+  .record-table td strong{display:block;font-size:.84rem;}
+  .record-table td span{display:block;color:var(--text-faint);font-size:.73rem;margin-top:2px;}
+  .status-text{font-weight:800;color:var(--leaf);}
+  .status-text.waiting{color:var(--orange-deep);}
+  .status-text.done{color:var(--ink-soft);}
+  .route-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .route-column{min-width:0;padding:18px;background:var(--sage);border:1px solid var(--line);border-radius:18px;}
+  .route-column h2{font-size:1rem;margin-bottom:14px;}
+  .route-ticket{padding:16px;margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 28px -28px rgba(21,35,26,.8);}
+  .route-ticket:first-of-type{margin-top:0;}
+  .route-ticket strong{display:block;font-size:.88rem;}
+  .route-ticket span{display:block;margin-top:4px;color:var(--text-faint);font-size:.75rem;}
+  .route-ticket .btn{margin-top:13px;width:100%;}
+  .detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .detail-cell{padding:17px;background:var(--sage);border:1px solid var(--line);border-radius:14px;}
+  .detail-cell strong{display:block;font-family:'Fraunces',serif;font-size:1.2rem;}
+  .detail-cell span{display:block;margin-top:4px;color:var(--text-faint);font-size:.76rem;}
+  /* ---- profile: photo, role picker, support ---- */
+  .avatar{overflow:hidden;}
+  .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+  .avatar.has-photo{background:none;}
+  .avatar-edit{display:flex;align-items:center;gap:18px;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .avatar-preview{display:grid;place-items:center;width:78px;height:78px;flex:none;border-radius:50%;overflow:hidden;background:linear-gradient(140deg,var(--leaf-bright),var(--leaf));color:#10230F;font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;}
+  .avatar-preview img{width:100%;height:100%;object-fit:cover;}
+  .avatar-edit-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+  .avatar-edit-actions .help{flex-basis:100%;margin:0;}
+  .form-subhead{margin:26px 0 12px;font-family:'Fraunces',serif;font-size:1.05rem;color:var(--ink);}
+  .form-hint{margin:-6px 0 12px;color:var(--text-faint);font-size:.8rem;}
+  .role-picker{display:grid;gap:10px;margin-bottom:6px;}
+  .role-choice input{position:absolute;opacity:0;width:1px;height:1px;}
+  .role-choice>span{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:14px;padding:13px 16px;border:1px solid var(--line-strong);border-radius:var(--r-md);background:rgba(255,255,255,.42);cursor:pointer;transition:border-color .2s ease,background .2s ease;}
+  .role-choice>span:hover{border-color:var(--leaf);background:var(--surface);}
+  .role-choice b{font-size:1.25rem;font-weight:400;}
+  .role-choice strong{display:block;font-size:.9rem;}
+  .role-choice small{display:block;color:var(--text-faint);font-size:.76rem;grid-column:2;}
+  .role-choice input:checked+span{border-color:var(--leaf);background:rgba(114,170,63,.12);box-shadow:0 0 0 3px rgba(114,170,63,.12);}
+  .role-choice input:focus-visible+span{outline:2px solid var(--leaf);outline-offset:3px;}
+  .profile-side{display:grid;gap:22px;align-content:start;}
+  .support-list{display:grid;}
+  .support-row{display:grid;grid-template-columns:26px 1fr;gap:13px;align-items:center;width:100%;padding:14px 0;border:0;border-top:1px solid var(--line);background:none;text-align:left;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s ease;}
+  .support-row:first-child{border-top:0;}
+  .support-row:hover{opacity:.72;}
+  .support-row i{font-style:normal;font-size:1.1rem;}
+  .support-row strong{display:block;font-size:.88rem;}
+  .support-row small{display:block;margin-top:2px;color:var(--text-faint);font-size:.76rem;line-height:1.4;}
+  .support-note{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);color:var(--text-faint);font-size:.76rem;}
+  .alert-list{display:grid;}
+  .alert-row{display:grid;grid-template-columns:9px 1fr;gap:12px;padding:13px 0;border-top:1px solid var(--line);}
+  .alert-row:first-child{border-top:0;}
+  .alert-row>i{width:9px;height:9px;margin-top:6px;border-radius:50%;background:var(--line-strong);}
+  .alert-row.unread>i{background:var(--orange);box-shadow:0 0 0 4px rgba(242,153,74,.16);}
+  .alert-row strong{display:block;font-size:.86rem;}
+  .alert-row small{display:block;margin-top:3px;color:var(--text-soft);font-size:.77rem;line-height:1.45;}
+  .alert-row .when{color:var(--text-faint);font-size:.71rem;}
+  @media (max-width:640px){
+    .avatar-edit{gap:14px;}
+    .avatar-preview{width:64px;height:64px;font-size:1.5rem;}
+  }
+
+  /* ---- live delivery tracking ---- */
+  .track-panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:0;margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);}
+  .track-map-wrap{position:relative;min-height:420px;}
+  #routeMap{position:absolute;inset:0;}
+  .track-live{position:absolute;z-index:500;top:14px;left:14px;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:rgba(11,31,22,.86);color:var(--paper);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+  .track-live i{width:7px;height:7px;border-radius:50%;background:#7ED957;animation:livePulse 1.6s ease-in-out infinite;}
+  @keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(126,217,87,.6);}50%{opacity:.6;box-shadow:0 0 0 7px rgba(126,217,87,0);}}
+  .track-side{display:flex;flex-direction:column;gap:18px;padding:24px;border-left:1px solid var(--line);background:var(--paper);}
+  .track-eta strong{display:block;font-family:'Fraunces',serif;font-size:1.45rem;line-height:1.2;color:var(--ink);}
+  .track-eta span{display:block;margin-top:5px;color:var(--text-faint);font-size:.8rem;}
+  .track-stages{list-style:none;margin:0;padding:0;display:grid;}
+  .track-stage{position:relative;display:grid;grid-template-columns:20px 1fr;gap:12px;padding:0 0 22px;}
+  .track-stage:last-child{padding-bottom:0;}
+  .track-stage::before{content:"";position:absolute;left:9px;top:18px;bottom:0;width:2px;background:var(--line-strong);}
+  .track-stage:last-child::before{display:none;}
+  .track-stage.done::before{background:var(--leaf);}
+  .track-stage>i{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-strong);background:var(--surface);z-index:1;}
+  .track-stage.done>i{background:var(--leaf);border-color:var(--leaf);}
+  .track-stage.live>i{background:var(--orange);border-color:var(--orange);box-shadow:0 0 0 5px rgba(242,153,74,.18);animation:livePulse 1.8s ease-in-out infinite;}
+  .track-stage strong{display:block;font-size:.88rem;color:var(--text-faint);}
+  .track-stage.done strong,.track-stage.live strong{color:var(--ink);}
+  .track-stage span span{display:block;margin-top:2px;color:var(--text-faint);font-size:.75rem;line-height:1.4;}
+  .track-meta{color:var(--text-faint);font-size:.76rem;}
+  .track-side .btn{margin-top:auto;align-self:flex-start;}
+  .eco-pin{display:grid;place-items:center;width:34px;height:34px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);font-size:15px;box-shadow:0 6px 16px -6px rgba(21,35,26,.7);}
+  .eco-pin>*{transform:rotate(45deg);}
+  .eco-pin-pickup{background:#FFFDF6;border:2px solid var(--leaf);}
+  .eco-pin-drop{background:#FFFDF6;border:2px solid var(--orange);}
+  .eco-driver{position:relative;display:grid;place-items:center;width:44px;height:44px;}
+  .eco-driver-body{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--surface);border:2px solid var(--orange);font-size:18px;box-shadow:0 8px 20px -8px rgba(21,35,26,.8);transition:transform .5s ease;}
+  .eco-driver-pulse{position:absolute;inset:0;border-radius:50%;background:rgba(242,153,74,.28);animation:livePulse 1.8s ease-in-out infinite;}
+  @media (max-width:900px){
+    .track-panel{grid-template-columns:1fr;}
+    .track-map-wrap{min-height:320px;}
+    .track-side{border-left:0;border-top:1px solid var(--line);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .track-live i,.track-stage.live>i,.eco-driver-pulse{animation:none;}
+    .eco-driver-body{transition:none;}
+  }
+  .geo-field select[disabled]{opacity:.62;cursor:not-allowed;background:rgba(21,35,26,.04);}
+  .geo-note{display:block;font-size:.78rem;font-style:normal;color:var(--text-faint);margin-top:6px;}
+  .geo-note:empty{display:none;}
+  .geo-note.warn{color:#B94735;}
+  .geo-field.invalid select,.geo-field.invalid input{border-color:var(--tomato);box-shadow:0 0 0 4px rgba(225,87,63,.14);}
+  .empty-state{padding:48px 22px;text-align:center;background:var(--sage);border:1px dashed var(--line-strong);border-radius:18px;}
+  .empty-state h2{font-size:1.35rem;margin-bottom:8px;}
+  .empty-state p{max-width:45ch;margin:0 auto 18px;color:var(--text-soft);font-size:.86rem;}
+  .toast{position:fixed;right:24px;bottom:24px;z-index:100;max-width:360px;padding:13px 17px;background:var(--bg-deep);color:var(--paper);border:1px solid rgba(139,195,74,.3);border-radius:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s ease,transform .25s var(--ease);font-size:.82rem;}
+  .toast.show{opacity:1;transform:none;}
+  .mobile-menu{display:none;}
+
+  @media (max-width:1100px){
+    .app-shell{grid-template-columns:232px minmax(0,1fr);}
+    .home-grid,.view-board{grid-template-columns:1fr;}
+    .home-secondary{grid-template-columns:repeat(3,1fr);align-items:start;}
+    .ai-stack{grid-column:1 / -1;grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:980px){
+    .app-shell{display:block;}
+    .sidebar{position:fixed;left:0;top:0;width:264px;transform:translateX(-102%);transition:transform .3s var(--ease);box-shadow:20px 0 50px -35px rgba(21,35,26,.8);}
+    .sidebar.is-open{transform:none;}
+    .mobile-menu{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);}
+    .mobile-menu svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
+    .app-mobile-bar{position:sticky;top:0;z-index:55;display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(242,239,226,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(14px);}
+    .app-mobile-bar .brand{margin-right:auto;}
+    .app-mobile-bar .brand img{height:25px;}
+    .app-topbar{top:0;}
+    .top-context{display:none;}
+    .home-secondary{grid-template-columns:1fr;}
+    .ai-stack{grid-template-columns:1fr;}
+  }
+  @media (max-width:720px){
+    .app-topbar{padding:12px 20px;}
+    .app-topbar>.top-account{display:none;}
+    .greeting,.view-intro{align-items:flex-start;flex-direction:column;padding:34px 0 24px;}
+    .greeting .btn,.view-intro .btn{width:100%;}
+    .impact-ledger{grid-template-columns:repeat(2,1fr);}
+    .impact-cell:nth-child(2){border-right:0;}
+    .impact-cell:nth-child(-n+2){border-bottom:1px solid var(--line);}
+    .offer-row{grid-template-columns:10px minmax(0,1fr) auto;gap:10px;}
+    .offer-qty{grid-column:2;text-align:left;}
+    .offer-row .time-chip{grid-column:3;grid-row:1;}
+    .offer-row .offer-action,.offer-row .claimed-state{grid-column:2 / -1;justify-self:start;}
+    .category-picker{grid-template-columns:repeat(2,1fr);}
+    .route-board{grid-template-columns:1fr;}
+    .detail-grid{grid-template-columns:1fr;}
+    .search-shortcut{display:none;}
+  }
+  @media (max-width:520px){
+    .app-content{padding-left:20px;padding-right:20px;}
+    .impact-cell{padding:16px 14px;}
+    .sheet{padding:19px 16px;}
+    .sheet-head{display:block;}
+    .filter-tabs{margin-top:15px;}
+    .toast{right:16px;left:16px;bottom:16px;max-width:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .side-link:hover,.offer-row:hover,.ai-note:hover,.category-choice:hover,.btn:hover:not(:active):not(:disabled){transform:none;}
+    .time-chip.urgent{animation:none;}
+    .search-results{animation:none;}
+  }
+</style>
+</head>
+<body class="app-page">
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar" aria-label="EcoBite navigation">
+    <a class="sidebar-brand" href="?view=home"><img src="logo-icon.webp" alt=""><span>ecobite</span></a>
+    <p class="sidebar-city">FIELD STATION · <span id="sideCity">Visakhapatnam</span></p>
+    <section class="side-section"><span class="side-label">Navigate</span><nav class="side-nav" id="mainNav">
+      <button class="side-link" data-view="home" aria-current="page"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5M9.5 20v-5h5v5"/></svg><span>Home</span></button>
+      <button class="side-link" data-view="donate"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M4 9h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 9Z"/><path d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9"/></svg><span>Donate</span></button>
+      <button class="side-link" data-view="receive"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M3 21V10l9-6 9 6v11"/><path d="M9 21v-6h6v6M3 21h18"/></svg><span>Receive</span></button>
+    </nav></section>
+    <section class="side-section"><span class="side-label">Your records</span><nav class="side-nav">
+      <button class="side-link" data-view="donations"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Your donations</span></button>
+      <button class="side-link" data-view="receives"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V4h8v3M8 12h8M8 16h5"/></svg><span>Your receives</span></button>
+    </nav></section>
+    <section class="side-section"><span class="side-label">Rescue tools</span><nav class="side-nav">
+      <button class="side-link" data-view="forecast"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 3-4 3 2 5-7"/></svg><span>Surplus forecast</span></button>
+      <button class="side-link" data-view="matching"><i class="node"></i><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="m10.2 10.2 3.6 3.6M16 5v3M5 16h3"/></svg><span>Nearby matching</span></button>
+      <button class="side-link" data-view="routing"><i class="node"></i><svg viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3a4 4 0 0 0 4-4V10a4 4 0 0 1 4-4"/></svg><span>Pickup routing</span></button>
+    </nav></section>
+    <div class="sidebar-footer"><button class="side-link" data-view="profile"><i class="node"></i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Profile</span></button><button class="side-link" data-view="settings"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="m19 13 2 1-2 3-2-1M5 13l-2 1 2 3 2-1M13 5l1-2h-4l1 2M13 19l1 2h-4l1-2"/></svg><span>Settings</span></button><div class="account-mini"><span class="avatar" id="sideAvatar">P</span><span><strong id="sideName">Priya Menon</strong><small id="sideRole">Connected account</small></span></div><button class="side-link" id="signOutLink"><i class="node"></i><svg viewBox="0 0 24 24"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg><span>Sign out</span></button></div>
+  </aside>
+  <div class="app-main">
+    <div class="app-mobile-bar"><button class="mobile-menu" id="mobileMenu" aria-expanded="false" aria-controls="sidebar"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="visually-hidden">Open menu</span></button><a class="brand" href="?view=home"><img src="logo-icon.webp" alt=""><span>ecobite</span></a><span class="avatar" id="mobileAvatar">P</span></div>
+    <header class="app-topbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="globalSearch" type="search" placeholder="Search offers, pickups, partners" aria-label="Search offers, pickups, partners" aria-controls="searchResults" autocomplete="off"><span class="search-shortcut">/</span><div class="search-results" id="searchResults" role="listbox"></div></div>
+      <div class="top-context"><small>Today · <span id="topCity">Visakhapatnam</span></small><span class="pill pill-leaf">Rescue desk</span></div>
+      <div class="top-account"><span class="avatar" id="topAvatar">P</span><span><strong id="topName">Priya Menon</strong><small id="topRole">Connected account</small></span></div>
+    </header>
+    <main class="app-content" id="viewMount" tabindex="-1"></main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="supabase-client.js"></script>
+<script src="geo-picker.js"></script>
+<script src="live-tracking.js"></script>
+<script src="phone-input.js"></script>
+<script src="food-catalog.js"></script>
+<script src="gps-picker.js"></script>
+<script>
+(async () => {
+  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let reduceMotion = reduceMotionQuery.matches;
+  if(reduceMotionQuery.addEventListener) reduceMotionQuery.addEventListener('change', () => { reduceMotion = reduceMotionQuery.matches; });
+  const preview = new URLSearchParams(window.location.search).has('preview');
+  let session = null;
+  let profile = {full_name:'Priya Menon',city:'Visakhapatnam',role:'org'};
+
+  if(!preview){
+    const sessionResult = await sb.auth.getSession();
+    session = sessionResult.data.session;
+    if(!session){ window.location.replace('signin.html'); return; }
+    const profileResult = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    if(profileResult.error || !profileResult.data){ window.location.replace('signup.html'); return; }
+    profile = {...profileResult.data, full_name:profileResult.data.full_name || session.user.email};
+  }
+
+  const firstName = (profile.full_name || 'Friend').split(' ')[0];
+  const roleNames = {donor:'Food donor',org:'Receiving organisation',driver:'Volunteer driver'};
+  const roleName = roleNames[profile.role] || 'EcoBite member';
+  const initial = firstName.charAt(0).toUpperCase();
+  ['sideCity','topCity'].forEach(id => document.getElementById(id).textContent = profile.city || 'Your city');
+  ['sideName','topName'].forEach(id => document.getElementById(id).textContent = profile.full_name || 'EcoBite member');
+  ['sideRole','topRole'].forEach(id => document.getElementById(id).textContent = roleName);
+  ['sideAvatar','topAvatar','mobileAvatar'].forEach(id => document.getElementById(id).textContent = initial);
+
+  // ---- profile photo in the sidebar / top bar ----------------------------
+  function setHeaderAvatar(url){
+    ['sideAvatar','topAvatar','mobileAvatar'].forEach(id => {
+      const node = document.getElementById(id);
+      if(!node) return;
+      node.innerHTML = url ? `<img src="${escapeHtml(url)}" alt="">` : '';
+      if(!url) node.textContent = initial;
+      node.classList.toggle('has-photo', !!url);
+    });
+  }
+  setHeaderAvatar(profile.avatar_url);
+
+  // ---- "food donated near me" alerts -------------------------------------
+  // The database trigger in supabase-schema.sql writes a notifications row for
+  // every receiver in the same district the moment a donor flags food. This
+  // listens for those rows over Realtime, so the alert lands without a refresh.
+  let alertChannel = null;
+
+  async function askNotificationPermission(){
+    if(!('Notification' in window) || Notification.permission !== 'default') return;
+    try { await Notification.requestPermission(); } catch (_) {}
+  }
+
+  function popNotification(row){
+    showToast(`${row.title} — ${row.body}`);
+    if('Notification' in window && Notification.permission === 'granted'){
+      const alert = new Notification(row.title, { body: row.body, icon: 'logo-icon.webp', tag: row.id });
+      alert.onclick = () => { window.focus(); renderView('receive'); };
+    }
+    const list = document.getElementById('alertList');
+    if(list) void loadAlerts();
+  }
+
+  async function loadAlerts(){
+    const list = document.getElementById('alertList');
+    if(!list || !session) return;
+    const { data, error } = await sb.from('notifications')
+      .select('*').order('created_at', { ascending: false }).limit(6);
+    if(error){ list.innerHTML = `<p class="empty-note">${escapeHtml(error.message)}</p>`; return; }
+    if(!data?.length){ list.innerHTML = '<p class="empty-note">No alerts yet. You will hear from us when food is flagged in your district.</p>'; return; }
+    list.innerHTML = `<div class="alert-list">${data.map(row => `<article class="alert-row ${row.read_at ? '' : 'unread'}"><i></i><span><strong>${escapeHtml(row.title)}</strong><small>${escapeHtml(row.body)}</small><small class="when">${new Date(row.created_at).toLocaleString()}</small></span></article>`).join('')}</div>`;
+    const unread = data.filter(row => !row.read_at).map(row => row.id);
+    if(unread.length) void sb.from('notifications').update({ read_at: new Date().toISOString() }).in('id', unread);
+  }
+
+  function watchNearbyAlerts(){
+    if(!session) return;
+    if(alertChannel){ try { sb.removeChannel(alertChannel); } catch (_) {} alertChannel = null; }
+    if(profile.notify_in_app === false) return;
+    alertChannel = sb.channel(`alerts-${session.user.id}`)
+      .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${session.user.id}` },
+          payload => popNotification(payload.new))
+      .subscribe();
+  }
+  if(!preview) watchNearbyAlerts();
+
+  const OFFERS = [
+    {id:'offer-1',kind:'chilled',name:'Sandwiches & salads',from:'Harbour Café · 1.9 km',qty:'18',unit:'portions',time:'35 min left',urgent:true},
+    {id:'offer-2',kind:'produce',name:'Mixed produce',from:'Green Grocer Market · 2.4 km',qty:'22',unit:'kg',time:'1h 05m left',warm:true},
+    {id:'offer-3',kind:'prepared',name:'Cooked biryani',from:'Rosa’s Kitchen · 1.2 km',qty:'14',unit:'portions',time:'2h 40m left'},
+    {id:'offer-4',kind:'prepared',name:'Dal & rice',from:'Sea View Hotel · 3.3 km',qty:'40',unit:'portions',time:'3h 15m left'},
+    {id:'offer-5',kind:'bakery',name:'Loaves & pastries',from:'Daily Bread Bakery · 0.8 km',qty:'30',unit:'items',time:'5h 10m left'},
+    {id:'offer-6',kind:'produce',name:'Tomatoes',from:'Coastal Farms · 6.1 km',qty:'60',unit:'kg',time:'9h 30m left'}
+  ];
+  const CAPACITY = [
+    {name:'St. Anne’s Shelter',what:'Hot meals, chilled · 0.6 km',value:28},
+    {name:'Eastside Community Fridge',what:'Chilled and dry goods · 1.4 km',value:64},
+    {name:'Harbour Kitchen',what:'Dry goods only · 2.8 km',value:88}
+  ];
+  const RUNS = [
+    {id:'418',driver:'Arun R.',path:'Green Grocer Market → Eastside Community Fridge',eta:'12 min away',stage:'In transit'},
+    {id:'419',driver:'Meera P.',path:'Rosa’s Kitchen → St. Anne’s Shelter',eta:'24 min away',stage:'Collected'},
+    {id:'417',driver:'Sanjay K.',path:'Daily Bread Bakery → Harbour Kitchen',eta:'4 min away',stage:'In transit'}
+  ];
+  const SEARCH_INDEX = [
+    {type:'Food available',title:'Sandwiches & salads',meta:'Harbour Café · 1.9 km',view:'receive',target:'offer-1'},
+    {type:'Food available',title:'Mixed produce',meta:'Green Grocer Market · 22 kg',view:'receive',target:'offer-2'},
+    {type:'Pickups',title:'Run #418',meta:'Green Grocer Market → Eastside Community Fridge',view:'routing'},
+    {type:'Locations',title:'St. Anne’s Shelter',meta:'Chilled food · 28% storage in use',view:'matching'}
+  ];
+  let currentView = new URLSearchParams(window.location.search).get('view') || 'home';
+  let currentFilter = 'all';
+  let claimOffer = null;
+  const viewMount = document.getElementById('viewMount');
+  const toast = document.getElementById('toast');
+  let toastTimer;
+
+  const showToast = message => { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 3200); };
+
+  // ---------- Live weather signal (Open-Meteo — free, key-free, no connector needed) ----------
+  // Feeds the "Today's weather" card on the Surplus forecast view. Fails quietly:
+  // the rest of the forecast view already stands on its own without it.
+  const WMO_RAIN_CODES = new Set([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99]);
+  const WMO_DESCRIPTIONS = {
+    0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Freezing fog',
+    51:'Light drizzle',53:'Moderate drizzle',55:'Dense drizzle',56:'Light freezing drizzle',57:'Dense freezing drizzle',
+    61:'Slight rain',63:'Moderate rain',65:'Heavy rain',66:'Light freezing rain',67:'Heavy freezing rain',
+    71:'Slight snow',73:'Moderate snow',75:'Heavy snow',77:'Snow grains',
+    80:'Slight rain showers',81:'Moderate rain showers',82:'Violent rain showers',85:'Slight snow showers',86:'Heavy snow showers',
+    95:'Thunderstorm',96:'Thunderstorm, slight hail',99:'Thunderstorm, heavy hail'
+  };
+  let weatherSignal = null;   // {code, tempMax, rainProbability, locLabel, kind}
+  let weatherLoading = false;
+
+  async function geocodeCity(name) {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=en&format=json`;
+    const response = await fetch(url);
+    const data = await response.json().catch(() => null);
+    const hit = data && data.results && data.results[0];
+    if (!hit) throw new Error('Location not found.');
+    return { latitude: hit.latitude, longitude: hit.longitude, label: [hit.name, hit.country].filter(Boolean).join(', ') };
+  }
+
+  async function fetchTodayWeather(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,precipitation_probability_max&forecast_days=1&timezone=auto`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const d = data.daily;
+    if (!d || !d.time || !d.time.length) throw new Error('No forecast returned.');
+    return {
+      code: d.weather_code[0],
+      tempMax: d.temperature_2m_max[0],
+      rainProbability: (d.precipitation_probability_max && d.precipitation_probability_max[0] != null) ? d.precipitation_probability_max[0] : null
+    };
+  }
+
+  function classifyWeather(day) {
+    if (!day) return 'clear';
+    if (WMO_RAIN_CODES.has(day.code)) return 'rain';
+    if (typeof day.tempMax === 'number' && (day.tempMax >= 40 || day.tempMax <= 5)) return 'extreme';
+    return 'clear';
+  }
+
+  function applyWeatherSignal() {
+    const pillEl = document.getElementById('weatherPillForecast');
+    if (!pillEl) return; // forecast view isn't mounted right now
+    const locLine = document.getElementById('weatherLocLine');
+    const tempCell = document.getElementById('weatherTempCell');
+    const rainCell = document.getElementById('weatherRainCell');
+    const note = document.getElementById('weatherNote');
+    if (weatherLoading) {
+      pillEl.textContent = 'Loading';
+      pillEl.className = 'pill pill-quiet';
+      locLine.textContent = `Checking conditions in ${profile.city || 'your area'}…`;
+      return;
+    }
+    if (!weatherSignal) {
+      pillEl.textContent = 'Unavailable';
+      pillEl.className = 'pill pill-quiet';
+      locLine.textContent = profile.city
+        ? `Could not reach the live weather source for ${profile.city} — plan around the pattern alongside this.`
+        : 'Add a city in Profile to see local weather here.';
+      tempCell.textContent = '—';
+      rainCell.textContent = '—';
+      note.textContent = 'Weather comes from Open-Meteo, a free public source — no sign-in needed.';
+      return;
+    }
+    const desc = WMO_DESCRIPTIONS[weatherSignal.code] || 'Conditions unavailable';
+    const pillCopy = weatherSignal.kind === 'rain' ? 'Rain likely' : weatherSignal.kind === 'extreme' ? 'Extreme heat' : 'Clear';
+    const pillClass = weatherSignal.kind === 'rain' ? 'pill-orange' : weatherSignal.kind === 'extreme' ? 'pill-tomato' : 'pill-leaf';
+    pillEl.textContent = pillCopy;
+    pillEl.className = 'pill ' + pillClass;
+    locLine.textContent = `${desc} in ${weatherSignal.locLabel} today.`;
+    tempCell.textContent = typeof weatherSignal.tempMax === 'number' ? `${Math.round(weatherSignal.tempMax)}°C` : '—';
+    rainCell.textContent = weatherSignal.rainProbability != null ? `${weatherSignal.rainProbability}%` : '—';
+    note.textContent = weatherSignal.kind === 'rain'
+      ? 'Rain tends to pull in-person collections earlier — flag urgent pickups sooner today.'
+      : weatherSignal.kind === 'extreme'
+      ? 'Extreme heat shortens how long prepared food stays safe to collect — prioritise same-day pickup.'
+      : 'No unusual weather today — plan around the rescue pattern alongside this.';
+  }
+
+  async function loadWeatherSignal() {
+    if (!profile.city) { weatherSignal = null; applyWeatherSignal(); return; }
+    weatherLoading = true;
+    applyWeatherSignal();
+    try {
+      const place = await geocodeCity(profile.city);
+      const day = await fetchTodayWeather(place.latitude, place.longitude);
+      weatherSignal = { ...day, locLabel: place.label, kind: classifyWeather(day) };
+    } catch (err) {
+      weatherSignal = null;
+    } finally {
+      weatherLoading = false;
+      applyWeatherSignal();
+      applyPrediction();
+    }
+  }
+
+  // ---------- Predictive AI outlook (weather + day-of-week calendar signal) ----------
+  // A transparent, explainable heuristic — not a trained model — so the reasoning
+  // shown to the user always matches the number shown to the user.
+  const DAY_PATTERN = [
+    { mult: .55, note: "Sundays run quiet — most kitchens are closed or low-volume." },
+    { mult: .85, note: "Mondays pick back up as kitchens restock after the weekend." },
+    { mult: .75, note: "Tuesdays are typically an average rescue day." },
+    { mult: .95, note: "Midweek prep tends to leave more usable surplus than early week." },
+    { mult: 1.35, note: "Thursdays have the strongest pattern — kitchens clear stock before the weekend rush." },
+    { mult: 1.1, note: "Fridays run busy, with steady evening offers." },
+    { mult: .9, note: "Saturdays are moderate, mostly from event and catering surplus." }
+  ];
+  const BASE_DAILY_OFFERS = 7; // baseline offers/day this network typically sees
+
+  function predictSurplus() {
+    const now = new Date();
+    const dayInfo = DAY_PATTERN[now.getDay()];
+    let mult = dayInfo.mult;
+    let weatherNote = null, weatherBadge = '⛅ Checking weather…', confidence = 55;
+    if (weatherLoading) {
+      weatherBadge = '⛅ Checking weather…';
+      confidence = 55;
+    } else if (weatherSignal) {
+      confidence = 84;
+      const temp = typeof weatherSignal.tempMax === 'number' ? `${Math.round(weatherSignal.tempMax)}°C` : '';
+      if (weatherSignal.kind === 'rain') {
+        mult *= 1.18;
+        weatherNote = 'Rain today usually pulls in-person handoffs earlier, nudging more offers into the system.';
+        weatherBadge = `🌧️ Rain likely${temp ? ', ' + temp : ''}`;
+      } else if (weatherSignal.kind === 'extreme') {
+        mult *= 1.28;
+        weatherNote = 'Extreme heat shortens how long prepared food stays safe, so more of it gets flagged rather than held.';
+        weatherBadge = `🌡️ Extreme heat${temp ? ', ' + temp : ''}`;
+      } else {
+        weatherNote = 'Clear weather today — no unusual push on the pattern.';
+        weatherBadge = `☀️ Clear${temp ? ', ' + temp : ''}`;
+      }
+    } else {
+      weatherBadge = profile.city ? '⛅ Weather unavailable' : '⛅ Add a city for weather';
+      confidence = 48;
+    }
+    const expected = Math.max(1, Math.round(BASE_DAILY_OFFERS * mult));
+    const low = Math.max(1, Math.round(expected * .8));
+    const high = Math.round(expected * 1.25);
+    const dayName = now.toLocaleDateString(undefined, { weekday: 'long' });
+    return {
+      expected, low, high,
+      headline: `Around ${low}–${high} offers may appear today.`,
+      reason: [dayInfo.note, weatherNote].filter(Boolean).join(' '),
+      weatherBadge,
+      dayBadge: `📅 ${dayName}`,
+      confidence
+    };
+  }
+
+  function animateCount(el, target, duration = 900) {
+    const startTime = performance.now();
+    const step = now => {
+      const t = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased);
+      if (t < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+  }
+
+  function applyPrediction() {
+    const card = document.getElementById('predictCard');
+    if (!card) return; // home view isn't mounted right now
+    const p = predictSurplus();
+    document.getElementById('predictHeadline').textContent = p.headline;
+    document.getElementById('predictReason').textContent = p.reason;
+    document.getElementById('predictWeatherBadge').textContent = p.weatherBadge;
+    document.getElementById('predictDayBadge').textContent = p.dayBadge;
+    document.getElementById('predictConfidencePill').textContent = weatherLoading ? 'Estimating…' : `${p.confidence}% confidence`;
+    document.getElementById('predictConfidenceLabel').textContent = `${p.confidence}%`;
+    const fill = document.getElementById('predictMeterFill');
+    if (fill) fill.style.width = p.confidence + '%';
+    const countEl = document.getElementById('predictCount');
+    if (countEl) { if (reduceMotion) countEl.textContent = p.expected; else animateCount(countEl, p.expected); }
+  }
+  const icon = name => ({search:'<svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',arrow:'<svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>'}[name] || '');
+
+  // ---------- Greeting + AI quote (typewriter effect) ----------
+  function getGreeting(date = new Date()) {
+    const hour = date.getHours();
+    if (hour < 5) return 'Good night';
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    if (hour < 21) return 'Good evening';
+    return 'Good night';
+  }
+
+  const AI_QUOTES = [
+    'Good food finds its way home when someone chooses to share it.',
+    'A shorter path from kitchen to table is a kinder path for everyone.',
+    'Small acts of rescue add up to a much fuller table.',
+    "Surplus isn't the end of a meal — it's the start of someone else's.",
+    'Every plate saved today is a little less waste tomorrow.',
+    'The best deliveries carry more than food — they carry care.',
+    'A community fed well is a community that grows well.',
+    "What's extra here can be exactly enough somewhere else.",
+    'Rescuing food rescues a little bit of tomorrow, too.',
+    'Nothing good has to go to waste when neighbours look out for each other.'
+  ];
+  // A stable "quote of the day" — same all day, changes tomorrow.
+  function dailyQuote(date = new Date()) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const dayIndex = Math.floor((date - start) / 86400000);
+    return AI_QUOTES[dayIndex % AI_QUOTES.length];
+  }
+
+  // Reveals `text` into `el` one character at a time, like a streamed AI reply.
+  function typeWriter(el, text, baseSpeed = 22) {
+    el.textContent = '';
+    let i = 0;
+    return new Promise(resolve => {
+      const step = () => {
+        if (i < text.length) {
+          el.textContent += text.charAt(i);
+          i++;
+          window.setTimeout(step, baseSpeed + Math.random() * 20);
+        } else {
+          resolve();
+        }
+      };
+      step();
+    });
+  }
+
+  function startAiQuote() {
+    const textEl = document.getElementById('aiQuoteText');
+    if (!textEl) return; // home view isn't mounted right now
+    const caret = document.getElementById('aiQuoteCaret');
+    const quote = dailyQuote();
+    if (reduceMotion) { textEl.textContent = quote; caret?.classList.add('done'); return; }
+    void typeWriter(textEl, quote).then(() => caret?.classList.add('done'));
+  }
+  const offerRows = (filter = currentFilter) => {
+    const offers = OFFERS.filter(item => filter === 'all' || item.kind === filter);
+    if(!offers.length) return '<p class="empty-note">No offers in this category right now. Check all food types or come back later.</p>';
+    return '<div class="offer-list">' + offers.map(item => `<article class="offer-row ${item.urgent?'urgent ':''}${item.claimed?'claimed':''}" id="${item.id}" data-kind="${item.kind}"><i class="category-dot ${item.kind}"></i><span><h3>${item.name}</h3><span class="where">${item.from}</span></span><span class="offer-qty"><strong>${item.qty}</strong>${item.unit}</span><span class="time-chip ${item.urgent?'urgent ':item.warm?'warm':''}">${item.time}</span><button class="btn btn-leaf btn-sm offer-action" data-offer="${item.id}">Claim</button><span class="claimed-state">Claimed</span></article>`).join('') + '</div>';
+  };
+  const capacityRows = () => '<div class="capacity-list">' + CAPACITY.map(item => `<div class="capacity-row"><div><strong>${item.name}</strong><span>${item.what}</span><div class="meter"><i class="${item.value >= 85?'full':item.value >= 55?'high':''}" style="--capacity:${item.value}%"></i></div></div><div class="capacity-value">${item.value}%</div></div>`).join('') + '</div>';
+  const miniBars = () => '<div class="mini-bars">' + [42,58,35,94,72,82,31].map((value,index) => `<span class="${index===3?'peak':''}" style="--bar:${value}%"></span>`).join('') + '</div><div class="mini-bars-labels">' + ['M','T','W','T','F','S','S'].map(day => `<span>${day}</span>`).join('') + '</div>';
+  const routeTicket = run => `<article class="route-ticket"><strong>Run #${run.id} · ${run.driver}</strong><span>${run.path}</span><span>${run.eta} · ${run.stage}</span><div class="ticket-route"><i></i><b></b><i class="current"></i><b></b><i></i></div><div class="ticket-meta"><span>Collected</span><span>In transit</span><span>Delivered</span></div><button class="btn btn-outline btn-sm" data-open-view="routing">Open route</button></article>`;
+  const navButton = view => `<button class="btn btn-outline btn-sm" data-open-view="${view}">Open view ${icon('arrow')}</button>`;
+
+  const HOME = () => `<section class="view view-home"><div class="greeting"><div><h1 data-typed-greeting>${getGreeting()}, ${firstName}.</h1><p>Here is what needs attention in your local rescue network today.</p><div class="greeting-meta"><span class="pill pill-leaf">${roleName}</span><span>6 offers need a receiving location today.</span></div></div><button class="btn btn-primary" data-open-view="receive">Review available food</button></div><section class="impact-ledger" aria-label="Your impact"><div class="impact-cell"><strong id="impactMeals">2,480</strong><span>Meals rescued this month</span></div><div class="impact-cell"><strong>1,140<small>kg</small></strong><span>Food diverted from waste</span></div><div class="impact-cell"><strong>3.2<small>t CO₂e</small></strong><span>Emissions avoided</span></div><div class="impact-cell"><strong>37</strong><span>Partners active nearby</span></div></section><div class="home-grid"><div class="home-primary"><section class="sheet" id="offersSheet"><div class="sheet-head"><div><h2>Food available now</h2><p>Sorted by how soon it stops being good to eat.</p></div><span class="pill pill-orange">6 offers</span></div><div class="filter-tabs" id="homeFilters">${['all','prepared','produce','bakery','chilled'].map(filter => `<button class="filter-tab ${currentFilter===filter?'on':''}" data-filter="${filter}">${filter.charAt(0).toUpperCase()+filter.slice(1)}</button>`).join('')}</div><div id="homeOfferList">${offerRows()}</div></section><section class="sheet sage"><div class="sheet-head"><div><h2>Storage nearby</h2><p>Capacity that can take the next handoff.</p></div><button class="btn btn-ghost btn-sm" data-open-view="matching">View matches</button></div>${capacityRows()}</section></div><aside class="home-secondary"><div><div class="sheet-head"><div><h2>Best next move</h2><p>Three explainable signals from the current rescue data.</p></div></div><div class="ai-stack"><article class="ai-note forecast"><div class="ai-label"><span>Surplus forecast</span><span class="pill pill-leaf">This week</span></div><h3>Expect more offers after 5:30 pm.</h3><p>Thursday has the strongest rescue pattern, and nearby kitchens usually flag food at close.</p>${miniBars()}<button class="ai-action" data-open-view="forecast">See weekly pattern ${icon('arrow')}</button></article><article class="ai-note match"><div class="ai-label"><span>Nearby matching</span><span class="pill pill-quiet">Fits storage</span></div><h3>Sandwiches & salads → St. Anne’s Shelter</h3><div class="match-route"><i></i><b></b><i></i></div><p>0.6 km away · takes chilled food · 28% storage in use.</p><button class="ai-action" data-open-view="matching">Review match ${icon('arrow')}</button></article><article class="ai-note route"><div class="ai-label"><span>Pickup routing</span><span>12 min away</span></div><h3>Run #418 is closest to expiry.</h3><p>Green Grocer Market → Eastside Community Fridge</p><div class="ticket-route"><i></i><b></b><i class="current"></i><b></b><i></i></div><div class="ticket-meta"><span>Collected</span><span>In transit</span><span>Delivered</span></div><button class="ai-action" data-open-view="routing">Open route ${icon('arrow')}</button></article></div></div></aside></div></section>`;
+  const DONATE = () => `<section class="view"><div class="view-intro"><div><h1>Food available to collect</h1><p>Choose the category, pick the item, say how much there is, and capture the exact pickup point from your device GPS.</p></div><span class="pill pill-leaf">Donor workspace</span></div><div class="view-board"><form class="form-sheet" id="donateForm"><h2>Flag food available</h2><p>Keep this short enough to use at close of day.</p>
+      <label class="field"><span>Food category <small>ten kinds of surplus</small></span><div class="category-picker" id="categoryPicker">${EcoFood.foodCategoryButtons('prepared')}</div></label>
+      <label class="field"><span>What is available?</span><select name="food" id="foodSelect" required></select><small class="help" id="foodHint"></small></label>
+      <label class="field" id="foodOtherField" hidden><span>Name the item</span><input name="food_other" id="foodOther" placeholder="Type the food item"></label>
+      <div class="field-row"><label class="field"><span>Quantity</span><input name="quantity" type="number" min="1" step="any" required placeholder="18"></label><label class="field"><span>Unit</span><select name="unit">${EcoFood.foodUnitOptions()}</select></label></div>
+      <label class="field"><span>Collect by</span><select name="deadline">${EcoFood.collectWindowOptions()}</select></label>
+
+      <h3 class="form-subhead">Exact pickup location</h3>
+      <p class="form-hint">EcoBite takes the coordinates straight from your device, then shows the pin on a live map. Receivers and drivers navigate to this point.</p>
+      <div class="gps-picker" data-gps="pickup" data-label="Pickup point (device GPS)" data-lat-name="pickup_latitude" data-lng-name="pickup_longitude" data-acc-name="pickup_accuracy_m" data-address-name="pickup_landmark"${profile.latitude && profile.longitude ? ` data-lat="${profile.latitude}" data-lng="${profile.longitude}"` : ''}></div>
+
+      <label class="field"><span>Notes for whoever collects <small>(optional)</small></span><textarea name="donor_notes" rows="3" placeholder="Gate number, floor, who to ask for, packaging…"></textarea></label>
+      <button class="btn btn-primary" type="submit">Flag food available</button></form><section class="sheet sage"><div class="sheet-head"><div><h2>Today&rsquo;s handoffs</h2><p>Offers you have already shared.</p></div></div><div class="empty-state"><h2>Ready when you are.</h2><p>Food you flag will appear here with its collection status, destination, and pickup coordinates.</p></div></section></div></section>`;
+  const RECEIVE = () => `<section class="view"><div class="view-intro"><div><h1>Food available nearby</h1><p>Choose what fits your storage and collection window. Every recommendation explains why it belongs with you.</p></div><button class="btn btn-primary" data-open-view="matching">Find the best match</button></div><div class="table-wrap"><table class="record-table"><thead><tr><th>Food</th><th>From</th><th>Amount</th><th>Collect by</th><th>Storage fit</th><th></th></tr></thead><tbody>${OFFERS.map(item => `<tr id="${item.id}"><td><strong>${item.name}</strong><span>${item.kind}</span></td><td>${item.from}</td><td>${item.qty} ${item.unit}</td><td><span class="status-text ${item.urgent?'waiting':''}">${item.time}</span></td><td><span class="status-text">Fits chilled room</span></td><td><button class="btn btn-leaf btn-sm offer-action" data-offer="${item.id}">Claim</button></td></tr>`).join('')}</tbody></table></div></section>`;
+  const RECORDS = type => `<section class="view"><div class="view-intro"><div><h1>${type==='donations'?'Your donations':'Your receives'}</h1><p>${type==='donations'?'A clear record of food you have flagged and where it landed.':'Food your organisation has claimed, collected, and received.'}</p></div><span class="pill pill-quiet">Updated just now</span></div><div class="table-wrap"><table class="record-table"><thead><tr><th>Food</th><th>Partner</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>${(type==='donations'?[['Mixed produce','Green Grocer Market','22 kg','Today','Delivered'],['Cooked biryani','Rosa’s Kitchen','14 portions','Yesterday','Collected'],['Loaves & pastries','Daily Bread Bakery','30 items','Mon 12 Aug','Awaiting collection']]:[['Sandwiches & salads','Harbour Café','18 portions','Today','Collection arranged'],['Tomatoes','Coastal Farms','60 kg','Yesterday','Received'],['Dal & rice','Sea View Hotel','40 portions','Sun 11 Aug','Received']]).map(row => `<tr><td><strong>${row[0]}</strong><span>${type==='donations'?'Offer':'Receive record'}</span></td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td><span class="status-text ${row[4].includes('Awaiting')?'waiting':row[4].includes('Delivered')||row[4].includes('Received')?'done':''}">${row[4]}</span></td></tr>`).join('')}</tbody></table></div></section>`;
+  const FORECAST = () => `<section class="view"><div class="view-intro"><div><h1>Expected surplus</h1><p>Use recent rescue activity, partner timing, and today's weather to plan the next collection window.</p></div><span class="pill pill-leaf">Derived from this week</span></div><div class="view-board"><section class="sheet"><div class="sheet-head"><div><h2>Meals rescued by day</h2><p>Thursday has the highest rescue volume in the current week.</p></div></div><div class="mini-bars" style="height:220px;gap:14px;align-items:flex-end;">${[42,58,35,94,72,82,31].map((value,index) => `<span class="${index===3?'peak':''}" style="--bar:${value}%;height:var(--bar)"></span>`).join('')}</div><div class="mini-bars-labels" style="font-size:.8rem;gap:14px;">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => `<span>${day}</span>`).join('')}</div></section><div style="display:grid;gap:26px;"><section class="sheet" id="weatherCard"><div class="sheet-head"><div><h2>Today's weather</h2><p id="weatherLocLine">Checking conditions in ${escapeHtml(profile.city || 'your area')}…</p></div><span class="pill pill-quiet" id="weatherPillForecast">Loading</span></div><div class="detail-grid"><div class="detail-cell"><strong id="weatherTempCell">—</strong><span>Today's high</span></div><div class="detail-cell"><strong id="weatherRainCell">—</strong><span>Chance of rain</span></div></div><p class="empty-note" id="weatherNote" style="padding:14px 0 0;">Weather comes from Open-Meteo, a free public source — no sign-in needed.</p><button class="btn btn-ghost btn-sm" id="weatherRefreshBtn" type="button" style="margin-top:6px;">Refresh weather</button></section><section class="sheet sage"><div class="sheet-head"><div><h2>What the pattern says</h2><p>Not a promise — a useful planning signal.</p></div></div><div class="detail-grid"><div class="detail-cell"><strong>5:30–8 pm</strong><span>Likely busy window</span></div><div class="detail-cell"><strong>Thursday</strong><span>Strongest rescue day</span></div><div class="detail-cell"><strong>3.2 t</strong><span>CO₂e avoided this month</span></div><div class="detail-cell"><strong>37</strong><span>Partners active nearby</span></div></div></section></div></div></section>`;
+  const MATCHING = () => `<section class="view"><div class="view-intro"><div><h1>Nearby matching</h1><p>Compare storage, distance, food category, and pickup readiness before you claim an offer.</p></div><span class="pill pill-leaf">Reasoned recommendations</span></div><div class="table-wrap"><table class="record-table"><thead><tr><th>Available food</th><th>Receiving location</th><th>Storage fit</th><th>Distance</th><th>Storage in use</th><th></th></tr></thead><tbody>${[['Sandwiches & salads','St. Anne’s Shelter','Chilled food','0.6 km','28%','Recommended'],['Mixed produce','Eastside Community Fridge','Dry + chilled','1.4 km','64%','Review'],['Cooked biryani','Harbour Kitchen','Dry goods','2.8 km','88%','Review']].map(row => `<tr><td><strong>${row[0]}</strong></td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td><button class="btn ${row[5]==='Recommended'?'btn-leaf':'btn-outline'} btn-sm" data-open-view="receive">${row[5]}</button></td></tr>`).join('')}</tbody></table></div></section>`;
+  const ROUTING = () => `<section class="view"><div class="view-intro"><div><h1>Pickup routing</h1><p>Follow the actual handoff stage. EcoBite keeps the urgent run visible without pretending there is a map where there is not.</p></div><span class="pill pill-orange">3 routes moving</span></div><div class="route-board"><section class="route-column"><h2>Ready to collect</h2>${routeTicket({...RUNS[1],stage:'Ready to collect'})}</section><section class="route-column"><h2>In transit</h2>${routeTicket(RUNS[0])}${routeTicket(RUNS[2])}</section><section class="route-column"><h2>Delivered</h2><article class="route-ticket"><strong>Run #416 · Kavya S.</strong><span>Harbour Café → St. Anne’s Shelter</span><span>Delivered 24 min ago</span><div class="ticket-route"><i></i><b></b><i></i><b></b><i class="current"></i></div><div class="ticket-meta"><span>Collected</span><span>In transit</span><span>Delivered</span></div></article></section></div></section>`;
+  const PROFILE = () => `<section class="view"><div class="view-intro"><div><h1>Profile</h1><p>Keep the details that help EcoBite greet you, route food to your door, and tell you when something lands nearby.</p></div><span class="pill pill-leaf">${roleName}</span></div><div class="view-board"><form class="form-sheet" id="profileForm">
+      <h2>Your details</h2>
+      <div class="avatar-edit">
+        <span class="avatar-preview" id="avatarPreview">${profile.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" alt="">` : escapeHtml(initial)}</span>
+        <div class="avatar-edit-actions">
+          <label class="btn btn-ghost btn-sm" for="avatarInput">Upload photo<input type="file" id="avatarInput" accept="image/png,image/jpeg,image/webp" hidden></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="avatarRemove"${profile.avatar_url ? '' : ' hidden'}>Remove</button>
+          <small class="help" id="avatarNote">JPG, PNG or WebP, up to 4 MB.</small>
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field"><span>First name</span><input name="first_name" value="${escapeHtml(profile.first_name || (profile.full_name || '').split(' ')[0] || '')}" required autocomplete="given-name"></label>
+        <label class="field"><span>Last name</span><input name="last_name" value="${escapeHtml(profile.last_name || (profile.full_name || '').split(' ').slice(1).join(' '))}" autocomplete="family-name"></label>
+      </div>
+      <label class="field"><span>Phone number</span><input name="phone" type="tel" data-phone value="${escapeHtml(profile.phone || '')}" autocomplete="tel"></label>
+
+      <h3 class="form-subhead">Complete address</h3>
+      <label class="field"><span>Address line 1</span><input name="address_line1" value="${escapeHtml(profile.address_line1 || '')}" placeholder="Flat / house no., building, street" autocomplete="address-line1"></label>
+      <div class="field-row">
+        <label class="field"><span>Address line 2</span><input name="address_line2" value="${escapeHtml(profile.address_line2 || '')}" placeholder="Area, locality" autocomplete="address-line2"></label>
+        <label class="field"><span>Landmark</span><input name="landmark" value="${escapeHtml(profile.landmark || '')}" placeholder="Near the temple, opposite the school…"></label>
+      </div>
+      <div class="geo-block" id="geoBlock"><label class="field geo-field" data-geo="country"><span>Country</span><select name="country"><option value="">Loading countries…</option></select><input type="text" class="geo-manual" placeholder="Type your country" hidden><em class="geo-note"></em></label><div class="field-row"><label class="field geo-field" data-geo="state"><span>State</span><select name="state"><option value="">Choose a country first</option></select><input type="text" class="geo-manual" placeholder="Type your state" hidden><em class="geo-note"></em></label><label class="field geo-field" data-geo="district"><span>District</span><select name="district"><option value="">Choose a state first</option></select><input type="text" class="geo-manual" placeholder="Type your district" hidden><em class="geo-note"></em></label></div></div>
+      <label class="field"><span>PIN / postal code</span><input name="pincode" value="${escapeHtml(profile.pincode || '')}" inputmode="numeric" maxlength="10" autocomplete="postal-code"></label>
+
+      <h3 class="form-subhead">Your exact location</h3>
+      <p class="form-hint">Saved once from your device GPS, then reused as the default pin whenever you donate or claim food. Only people on a shared handoff ever see it.</p>
+      <div class="gps-picker" data-gps="home" data-label="Your GPS point" data-lat-name="latitude" data-lng-name="longitude" data-acc-name="location_accuracy_m"${profile.latitude && profile.longitude ? ` data-lat="${profile.latitude}" data-lng="${profile.longitude}"` : ''}></div>
+
+      <h3 class="form-subhead">How you participate</h3>
+      <div class="role-picker">
+        ${[['donor','🥕','Food donor','You flag surplus food for collection.'],['org','🤝','Receiving organisation','You claim and distribute food nearby.'],['driver','🛵','Volunteer driver','You move food from donor to receiver.']].map(([value,emoji,name,line]) => `<label class="role-choice"><input type="radio" name="role" value="${value}" ${profile.role===value?'checked':''}><span><b>${emoji}</b><strong>${name}</strong><small>${line}</small></span></label>`).join('')}
+      </div>
+
+      <h3 class="form-subhead">Alerts for food near you</h3>
+      <p class="form-hint">When a donor flags food in your district, EcoBite tells you straight away.</p>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" name="notify_in_app" ${profile.notify_in_app === false ? '' : 'checked'}><span>Notify me on this dashboard</span></label>
+        <label class="chip"><input type="checkbox" name="notify_email" ${profile.notify_email === false ? '' : 'checked'}><span>Email me too</span></label>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Save profile</button>
+    </form>
+    <aside class="profile-side">
+      <section class="sheet sage">
+        <div class="sheet-head"><div><h2>Help &amp; support</h2><p>Stuck on something, or spotted a problem? A person reads every message.</p></div></div>
+        <div class="support-list">
+          <a class="support-row" href="mailto:ecobite.ai@gmail.com?subject=EcoBite%20support%20request"><i>✉️</i><span><strong>ecobite.ai@gmail.com</strong><small>Account, donations, deliveries — anything at all.</small></span></a>
+          <a class="support-row" href="mailto:ecobite.ai@gmail.com?subject=EcoBite%20food%20safety%20concern"><i>⚠️</i><span><strong>Report a food safety concern</strong><small>Tell us what happened and we will follow it up.</small></span></a>
+          <button type="button" class="support-row" data-open-view="settings"><i>⚙️</i><span><strong>Rescue preferences</strong><small>Storage, availability and route updates.</small></span></button>
+        </div>
+        <p class="support-note">We usually reply within a day. Include your district so we can look up the right activity.</p>
+      </section>
+      <section class="sheet">
+        <div class="sheet-head"><div><h2>Recent alerts</h2><p>Food flagged near you.</p></div></div>
+        <div id="alertList"><p class="empty-note">Loading your alerts…</p></div>
+      </section>
+    </aside></div></section>`;
+  const SETTINGS = () => `<section class="view"><div class="view-intro"><div><h1>Settings</h1><p>Set the signals EcoBite uses to make practical recommendations.</p></div><span class="pill pill-quiet">Personal controls</span></div><div class="view-board"><form class="form-sheet" id="settingsForm"><h2>Rescue preferences</h2><p>These settings stay local in this prototype and are ready to connect to your profile later.</p><label class="field"><span>Availability window</span><select><option>Today, 5:30–8:00 pm</option><option>Weekday mornings</option><option>Weekends</option><option>On call</option></select></label><label class="field"><span>Storage you can offer</span><div class="chips"><label class="chip"><input type="checkbox" checked><span>Chilled</span></label><label class="chip"><input type="checkbox"><span>Frozen</span></label><label class="chip"><input type="checkbox" checked><span>Dry goods</span></label></div></label><label class="field"><span>Route updates</span><div class="chips"><label class="chip"><input type="checkbox" checked><span>Email</span></label><label class="chip"><input type="checkbox" checked><span>Dashboard</span></label></div></label><button class="btn btn-primary" type="submit">Save settings</button></form><section class="sheet sage"><div class="sheet-head"><div><h2>Account</h2><p>Authentication stays managed by Supabase.</p></div></div><div class="detail-grid"><div class="detail-cell"><strong>Protected</strong><span>Email and password sign-in</span></div><div class="detail-cell"><strong>Private</strong><span>Your profile and records</span></div></div><div class="support-list" style="margin-top:18px"><a class="support-row" href="mailto:ecobite.ai@gmail.com?subject=EcoBite%20support%20request"><i>✉️</i><span><strong>Help &amp; support</strong><small>ecobite.ai@gmail.com — we reply within a day.</small></span></a></div></section></div></section>`;
+
+  const NETWORK = () => {
+    if(profile.role === 'org') return `<section class="view"><div class="view-intro"><div><h1>Find donors</h1><p>Search verified food donors in ${profile.city || 'your city'} and request a delivery.</p></div></div><div class="view-board"><section class="sheet"><label class="field"><span>Search donors</span><input id="networkQuery" placeholder="Name, business, or food type"></label><div id="networkResults"><p class="empty-note">Searching registered donors…</p></div></section><form class="form-sheet" id="deliveryRequestForm" hidden><h2>Request delivery</h2><input type="hidden" name="donor_id"><p id="selectedDonor"></p><label class="field"><span>Food summary</span><input name="food_summary" required></label><div class="gps-picker" data-gps="reqPickup" data-label="Pickup point — drag the pin to the donor" data-lat-name="pickup_latitude" data-lng-name="pickup_longitude"></div><div class="gps-picker" data-gps="reqDrop" data-label="Destination — your exact drop-off point" data-lat-name="dropoff_latitude" data-lng-name="dropoff_longitude"></div><label class="field"><span>Delivery type</span><select name="delivery_mode"><option value="free">Free volunteer delivery</option><option value="paid">Paid delivery</option></select></label><label class="field"><span>Offer amount (optional)</span><input name="offered_amount" type="number" min="0" step="0.01"></label><label class="field"><span>Notes</span><input name="notes"></label><button class="btn btn-primary">Create delivery request</button></form></div></section>`;
+    if(profile.role === 'donor') return `<section class="view"><div class="view-intro"><div><h1>Find a driver</h1><p>Choose free volunteers or paid delivery support without exposing live location.</p></div></div><section class="sheet"><label class="field"><span>Delivery preference</span><select id="driverMode"><option value="free">Free only</option><option value="paid">Paid only</option></select></label><div id="networkResults"><p class="empty-note">Loading available drivers…</p></div></section></section>`;
+    return `<section class="view"><div class="view-intro"><div><h1>Driver dispatch</h1><p>Set your availability, then claim a delivery when you are ready.</p></div></div><div class="view-board"><form class="form-sheet" id="driverPreferences"><h2>Delivery preferences</h2><label class="field"><span>Service city</span><input name="service_city" value="${escapeHtml(profile.city || '')}" required></label><label class="field"><span>Delivery option</span><select name="delivery_mode"><option value="free">Free</option><option value="paid">Paid</option><option value="both">Both</option></select></label><label class="field"><span>Base fee</span><input name="base_fee" type="number" min="0" step="0.01"></label><label class="field"><span>Maximum distance (km)</span><input name="max_distance_km" type="number" min="1" value="15"></label><label class="chip"><input name="is_available" type="checkbox" checked><span>Available for deliveries</span></label><button class="btn btn-primary">Save availability</button></form><section class="sheet"><h2>Open delivery jobs</h2><div id="networkResults"><p class="empty-note">Loading dispatch…</p></div></section></div></section>`;
+  };
+  const ROUTING_LIVE = () => `<section class="view"><div class="view-intro"><div><h1>Track your delivery</h1><p>Live driver location, route, and arrival time for the deliveries you are part of.</p></div><span class="pill pill-orange">Private to this delivery</span></div><section class="sheet"><div class="sheet-head"><div><h2>Your deliveries</h2><p>Pick one to follow it on the map.</p></div></div><div id="deliveryRows"><p class="empty-note">Loading deliveries…</p></div></section><section class="track-panel" id="routePanel" hidden><div class="track-map-wrap"><div id="routeMap"></div><div class="track-live" id="trackLive"><i></i>Live</div></div><div class="track-side"><div class="track-eta" id="trackEta"><strong>Loading…</strong><span>Fetching this delivery.</span></div><ol class="track-stages" id="trackStages"></ol><p class="track-meta" id="trackMeta"></p><button class="btn btn-ghost btn-sm" id="trackClose">Close tracking</button></div></section></section>`;
+  // Empty states are shown until real donations and received-food records are available.
+  const EMPTY_RECEIVE = () => `<section class="view"><div class="view-intro"><div><h1>Food available nearby</h1><p>Choose what fits your storage and collection window.</p></div></div><div class="empty-state"><h2>No food available yet.</h2><p>New food offers from verified donors will appear here when they are available.</p></div></section>`;
+  const EMPTY_RECORDS = type => `<section class="view"><div class="view-intro"><div><h1>${type === 'donations' ? 'Your donations' : 'Your receives'}</h1><p>${type === 'donations' ? 'A clear record of food you have flagged and where it landed.' : 'Food your organisation has claimed, collected, and received.'}</p></div></div><div class="empty-state"><h2>${type === 'donations' ? 'No donations yet.' : 'No received food yet.'}</h2><p>${type === 'donations' ? 'Your donations will appear here after you flag food as available.' : 'Food you claim and receive will appear here.'}</p></div></section>`;
+
+  const LIVE_RECEIVE = () => `<section class="view"><div class="view-intro"><div><h1>Food available nearby</h1><p>Open donations from verified donors in ${escapeHtml(profile.city || 'your area')}.</p></div></div><div id="receiveOfferList"><p class="empty-note">Loading available food…</p></div></section>`;
+  const LIVE_RECORDS = type => `<section class="view"><div class="view-intro"><div><h1>${type === 'donations' ? 'Your donations' : 'Your receives'}</h1><p>${type === 'donations' ? 'Food you have flagged as available.' : 'Food your organisation has claimed.'}</p></div></div><div id="recordList"><p class="empty-note">Loading your records…</p></div></section>`;
+
+  const CLAIM = () => {
+    if (!claimOffer) return `<section class="view"><div class="empty-state"><h2>Choose an offer first.</h2><p>Return to available food and select Claim.</p><button class="btn btn-primary" data-open-view="receive">View available food</button></div></section>`;
+    return `<section class="view"><div class="view-intro"><div><h1>Arrange collection</h1><p>Confirm the handoff details before claiming this offer.</p></div><button class="btn btn-ghost btn-sm" data-open-view="receive">Back to offers</button></div><div class="view-board"><form class="form-sheet" id="claimOfferForm"><h2>${escapeHtml(claimOffer.food_name)}</h2><p>${escapeHtml(claimOffer.quantity)} ${escapeHtml(claimOffer.unit)} · Collect by ${escapeHtml(claimOffer.collect_by)}</p><label class="field"><span>Contact name</span><input name="contact_name" required value="${escapeHtml(profile.full_name || '')}" autocomplete="name"></label><label class="field"><span>Phone number</span><input name="phone" type="tel" required data-phone autocomplete="tel"></label><label class="field"><span>Collection address</span><textarea name="address" required rows="3" placeholder="Building, street, area, and arrival instructions"></textarea><small class="help">Visible only to the donor and any arranged driver.</small></label><h3 class="form-subhead">Exact drop-off location</h3><p class="form-hint">Capture the delivery point with GPS so the driver is routed to the right door and you can follow the run on the live map.</p><div class="gps-picker" data-gps="dropoff" data-label="Drop-off point (device GPS)" data-lat-name="dropoff_latitude" data-lng-name="dropoff_longitude" data-acc-name="dropoff_accuracy_m"></div><label class="field"><span>How will the food be collected?</span><select name="pickup_mode" required><option value="self">We will collect it ourselves</option><option value="driver">Please arrange a volunteer driver</option></select></label><label class="field"><span>Notes for the handoff (optional)</span><textarea name="notes" rows="3" placeholder="Loading entrance, preferred call time, storage notes…"></textarea></label><button class="btn btn-primary" type="submit">Confirm claim</button></form><section class="sheet sage"><h2>What happens next</h2><p>The donor receives your pickup plan and contact details. Driver requests can use these same private handoff details.</p></section></div></section>`;
+  };
+
+  const offerTable = (offers, mode) => {
+    if (!offers.length) {
+      const copy = mode === 'donations' ? ['No donations yet.', 'Your donations will appear here after you flag food as available.'] : mode === 'receives' ? ['No received food yet.', 'Food you claim and receive will appear here.'] : ['No food available yet.', 'New food offers from verified donors will appear here when they are available.'];
+      return `<div class="empty-state"><h2>${copy[0]}</h2><p>${copy[1]}</p></div>`;
+    }
+    return `<div class="table-wrap"><table class="record-table"><thead><tr><th>Food</th><th>Donor</th><th>Amount</th><th>Collect by</th><th>Status</th>${mode === 'available' ? '<th></th>' : ''}</tr></thead><tbody>${offers.map(offer => `<tr><td><strong>${escapeHtml(offer.food_name)}</strong><span>${escapeHtml(offer.category)}</span></td><td>${escapeHtml(offer.donor?.org_name || offer.donor?.full_name || 'EcoBite donor')}</td><td>${escapeHtml(offer.quantity)} ${escapeHtml(offer.unit)}</td><td>${escapeHtml(offer.collect_by)}</td><td><span class="status-text ${offer.status === 'open' ? 'waiting' : 'done'}">${escapeHtml(offer.status)}</span></td>${mode === 'available' ? `<td><div class="row-actions"><button class="btn btn-leaf btn-sm" data-claim-offer="${offer.id}">Claim</button>${offer.pickup_latitude ? `<button class="btn btn-outline btn-sm" data-offer-map="${offer.id}">🗺️ Live map</button>` : ''}</div></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
+  };
+
+  const loadOffers = async (mode) => {
+    const target = document.getElementById(mode === 'available' ? 'receiveOfferList' : 'recordList');
+    if (!target || !session) return;
+    let query = sb.from('food_offers').select('*, donor:profiles!food_offers_donor_id_fkey(full_name,org_name)').order('created_at', { ascending: false });
+    // ilike (no wildcards) matches the district however it was capitalised.
+    if (mode === 'available') query = query.eq('status', 'open').ilike('city', profile.city || '');
+    if (mode === 'donations') query = query.eq('donor_id', session.user.id);
+    if (mode === 'receives') query = query.eq('recipient_id', session.user.id);
+    const { data, error } = await query;
+    if (error) { target.innerHTML = `<p class="empty-note">${escapeHtml(error.message)}</p>`; return; }
+    target.innerHTML = offerTable(data || [], mode);
+    if (mode === 'donations') {
+      const claimedOffers = (data || []).filter(offer => offer.status === 'claimed');
+      if (claimedOffers.length) target.insertAdjacentHTML('beforeend', `<section class="sheet sage"><div class="sheet-head"><div><h2>Claimant collection details</h2><p>Only you and the successful recipient can see these handoff details.</p></div></div><div class="detail-grid">${claimedOffers.map(offer => `<div class="detail-cell"><strong>${escapeHtml(offer.food_name)}</strong><span>${escapeHtml(offer.recipient_contact_name || 'Recipient')} · ${escapeHtml(offer.recipient_phone || 'No phone provided')}</span><span>${escapeHtml(offer.pickup_mode === 'driver' ? 'Volunteer driver requested' : 'Recipient will collect')}</span><span>${escapeHtml(offer.pickup_address || 'No address provided')}</span>${offer.pickup_notes ? `<span>${escapeHtml(offer.pickup_notes)}</span>` : ''}</div>`).join('')}</div></section>`);
+    }
+    target.querySelectorAll('[data-claim-offer]').forEach(button => button.addEventListener('click', () => {
+      claimOffer = (data || []).find(offer => offer.id === button.dataset.claimOffer) || null;
+      renderView('claim');
+    }));
+    target.querySelectorAll('[data-offer-map]').forEach(button => button.addEventListener('click', () => {
+      const offer = (data || []).find(item => item.id === button.dataset.offerMap);
+      if (offer) showOfferMap(offer, target);
+    }));
+  };
+
+  // ---- live map for a single offer: pickup pin + your moving position ----
+  let offerMap = null, offerWatch = null;
+  const closeOfferMap = () => {
+    if (offerWatch !== null) { navigator.geolocation.clearWatch(offerWatch); offerWatch = null; }
+    if (offerMap) { offerMap.remove(); offerMap = null; }
+    document.getElementById('offerMapPanel')?.remove();
+  };
+  const showOfferMap = (offer, mount) => {
+    closeOfferMap();
+    const pickup = [Number(offer.pickup_latitude), Number(offer.pickup_longitude)];
+    mount.insertAdjacentHTML('beforeend', `<section class="sheet offer-map-panel" id="offerMapPanel">
+      <div class="sheet-head"><div><h2>${escapeHtml(offer.food_name)} — pickup point</h2><p>${escapeHtml(offer.pickup_landmark || 'Exact coordinates shared by the donor.')}</p></div><button class="btn btn-ghost btn-sm" id="offerMapClose">Close map</button></div>
+      <div class="gps-map-wrap" style="height:340px"><div class="gps-map" id="offerMap"></div><span class="gps-live-badge" id="offerMapBadge" hidden><i></i>Live GPS</span></div>
+      <div class="gps-readout"><span class="gps-coord"><small>Latitude</small><strong>${escapeHtml(offer.pickup_latitude)}</strong></span><span class="gps-coord"><small>Longitude</small><strong>${escapeHtml(offer.pickup_longitude)}</strong></span><span class="gps-coord"><small>Distance from you</small><strong id="offerMapDistance">—</strong></span></div>
+      <p class="gps-note" id="offerMapNote">Turn on live tracking to watch your own position move towards the pickup point.</p>
+      <div class="gps-actions" style="margin-top:12px"><button type="button" class="btn btn-leaf btn-sm" id="offerMapTrack">🛰️ Track me live</button><a class="btn btn-outline btn-sm" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=${pickup[0]}&mlon=${pickup[1]}#map=17/${pickup[0]}/${pickup[1]}">Open directions</a></div>
+    </section>`);
+    const panel = document.getElementById('offerMapPanel');
+    offerMap = L.map(document.getElementById('offerMap'), { scrollWheelZoom: false }).setView(pickup, 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(offerMap);
+    L.marker(pickup, { icon: L.divIcon({ className: 'eco-pin-wrap', html: '<span class="eco-pin eco-pin-pickup">🍲</span>', iconSize: [34, 34], iconAnchor: [17, 17] }) }).addTo(offerMap).bindPopup('Pickup point');
+    window.setTimeout(() => offerMap.invalidateSize(), 140);
+
+    let meMarker = null, meLine = null;
+    document.getElementById('offerMapTrack').addEventListener('click', event => {
+      if (offerWatch !== null) {
+        navigator.geolocation.clearWatch(offerWatch); offerWatch = null;
+        document.getElementById('offerMapBadge').hidden = true;
+        event.currentTarget.textContent = '🛰️ Track me live';
+        return;
+      }
+      if (!navigator.geolocation) { document.getElementById('offerMapNote').textContent = 'This browser cannot read GPS.'; return; }
+      document.getElementById('offerMapBadge').hidden = false;
+      event.currentTarget.textContent = '⏹ Stop tracking';
+      offerWatch = navigator.geolocation.watchPosition(position => {
+        const me = [position.coords.latitude, position.coords.longitude];
+        if (!meMarker) {
+          meMarker = L.marker(me, { icon: L.divIcon({ className: 'eco-driver-wrap', html: '<span class="eco-driver"><b class="eco-driver-pulse"></b><b class="eco-driver-body">🧍</b></span>', iconSize: [44, 44], iconAnchor: [22, 22] }) }).addTo(offerMap);
+          meLine = L.polyline([me, pickup], { color: '#F2994A', weight: 3, dashArray: '4 9' }).addTo(offerMap);
+          offerMap.fitBounds([me, pickup], { padding: [50, 50], maxZoom: 16 });
+        } else {
+          meMarker.setLatLng(me);
+          meLine.setLatLngs([me, pickup]);
+        }
+        // Straight-line distance, refreshed with every GPS reading.
+        const R = 6371000, rad = deg => deg * Math.PI / 180;
+        const dLat = rad(pickup[0] - me[0]), dLng = rad(pickup[1] - me[1]);
+        const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(me[0])) * Math.cos(rad(pickup[0])) * Math.sin(dLng / 2) ** 2;
+        const metres = 2 * R * Math.asin(Math.sqrt(h));
+        document.getElementById('offerMapDistance').textContent = metres < 950 ? `${Math.round(metres)} m` : `${(metres / 1000).toFixed(1)} km`;
+        document.getElementById('offerMapNote').textContent = 'Your position updates as you move. The dashed line is the direct distance to the food.';
+      }, () => { document.getElementById('offerMapNote').textContent = 'Location permission was not granted.'; }, { enableHighAccuracy: true, maximumAge: 8000, timeout: 20000 });
+    });
+    document.getElementById('offerMapClose').addEventListener('click', closeOfferMap);
+    panel.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
+
+  const renderView = view => {
+    currentView = view;
+    const HOME_LIVE = () => `<section class="view"><div class="greeting"><div><h1>${getGreeting()}, ${firstName}.</h1><span class="ai-quote-label">EcoBite AI</span><p class="ai-quote" id="aiQuoteBlock"><span class="ai-quote-icon" aria-hidden="true">✨</span><span id="aiQuoteText"></span><span class="ai-caret" id="aiQuoteCaret"></span></p><div class="greeting-meta"><span class="pill pill-leaf">${roleName}</span><span>EcoBite shows activity from your real rescue network.</span></div></div><button class="btn btn-primary" data-open-view="${profile.role === 'donor' ? 'donate' : 'receive'}">${profile.role === 'donor' ? 'Share food' : 'View available food'}</button></div><div class="home-grid"><div class="home-primary"><section class="sheet"><div class="sheet-head"><div><h2>Ready when you are</h2><p>Your published offers, claims, and collection plans will appear in the records area.</p></div></div><div class="detail-grid"><div class="detail-cell"><strong>Food donors</strong><span>Share food and see claimant contact and pickup details in Your donations.</span></div><div class="detail-cell"><strong>Receiving organisations</strong><span>Claim food and provide a collection plan.</span></div><div class="detail-cell"><strong>Volunteer drivers</strong><span>Manage delivery availability from Nearby matching.</span></div></div></section></div><aside class="home-secondary"><article class="predict-card" id="predictCard"><div class="predict-top"><span class="predict-label"><span class="predict-dot"></span>EcoBite AI · Today's outlook</span><span class="pill pill-leaf" id="predictConfidencePill">Estimating…</span></div><div class="predict-range"><span class="predict-count"><span class="count-up" id="predictCount">–</span><small>offers likely today</small></span></div><h3 class="predict-headline" id="predictHeadline">Reading today's weather and calendar…</h3><p class="predict-reason" id="predictReason">EcoBite AI blends live local weather with the day-of-week rescue pattern to estimate how much surplus food is likely to appear today.</p><div class="predict-badges"><span class="predict-badge" id="predictWeatherBadge">⛅ Checking weather…</span><span class="predict-badge" id="predictDayBadge">📅 —</span></div><div class="predict-meter"><i id="predictMeterFill"></i></div><div class="predict-meter-label"><span>Prediction confidence</span><span id="predictConfidenceLabel">—</span></div></article></aside></div></section>`;
+    const templates = {home:HOME_LIVE,donate:DONATE,receive:LIVE_RECEIVE,claim:CLAIM,donations:() => LIVE_RECORDS('donations'),receives:() => LIVE_RECORDS('receives'),forecast:FORECAST,matching:NETWORK,routing:ROUTING_LIVE,profile:PROFILE,settings:SETTINGS};
+    stopGpsPickers();
+    closeOfferMap();
+    viewMount.innerHTML = (templates[view] || HOME)();
+    document.querySelectorAll('.side-link[data-view]').forEach(button => { const active = button.dataset.view === view; button.setAttribute('aria-current', active ? 'page' : 'false'); });
+    history.replaceState(null,'',`?view=${view}${preview?'&preview=1':''}`);
+    bindView();
+    if (!preview && view === 'receive') void loadOffers('available');
+    if (!preview && view === 'donations') void loadOffers('donations');
+    if (!preview && view === 'receives') void loadOffers('receives');
+    if(!preview && view === 'matching') void loadNetwork();
+    if(!preview && view === 'routing') void loadDeliveries();
+    if(view === 'forecast') applyWeatherSignal();
+    if(view === 'home'){ startAiQuote(); applyPrediction(); const g = viewMount.querySelector('[data-typed-greeting]'); if(g && !reduceMotion){ const t = g.textContent; g.textContent=''; void typeWriter(g, t, 34); } }
+    if(!reduceMotion){ requestAnimationFrame(() => viewMount.querySelectorAll('.view-intro,.sheet,.form-sheet,.route-column,.table-wrap,.predict-card,.offer-map-panel,.track-panel').forEach((element,index) => { element.style.animation = `popIn .45s var(--ease) ${Math.min(index * .05,.22)}s both`; })); viewMount.querySelectorAll('.offer-row,.category-choice,.capacity-row,.ai-note').forEach((element,index) => { element.style.animation = `popIn .4s var(--ease) ${Math.min(.08 + index * .04,.3)}s both`; }); }
+    viewMount.focus({preventScroll:true});
+  };
+  // Live GPS watchers are stopped whenever a view is replaced.
+  let activeGps = [];
+  const stopGpsPickers = () => { activeGps.forEach(picker => { try { picker?.stop(); } catch (error) {} }); activeGps = []; };
+  const gpsFor = key => viewMount.querySelector(`[data-gps="${key}"]`)?.ecoGps || null;
+
+  const bindView = () => {
+    // Every phone box becomes country code + digits-only; every [data-gps]
+    // block becomes a real GPS capture with its own live map.
+    EcoPhone.setupPhoneFields(viewMount);
+    activeGps = EcoGps.setupGpsPickers(viewMount).filter(Boolean);
+    viewMount.querySelectorAll('[data-open-view]').forEach(button => button.addEventListener('click', () => renderView(button.dataset.openView)));
+    document.getElementById('weatherRefreshBtn')?.addEventListener('click', () => void loadWeatherSignal());
+    viewMount.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { currentFilter = button.dataset.filter; viewMount.querySelectorAll('.filter-tab').forEach(tab => tab.classList.toggle('on', tab === button)); const list = document.getElementById('homeOfferList'); if(list) list.innerHTML = offerRows(); bindView(); }));
+    viewMount.querySelectorAll('[data-offer]').forEach(button => button.addEventListener('click', () => { const offer = OFFERS.find(item => item.id === button.dataset.offer); if(offer) { offer.claimed = true; showToast(`${offer.name} is on your receive list.`); renderView(currentView); } }));
+    const donateForm = document.getElementById('donateForm');
+    if (donateForm) {
+      const foodSelect = document.getElementById('foodSelect');
+      const foodHint = document.getElementById('foodHint');
+      const foodOtherField = document.getElementById('foodOtherField');
+      const foodOther = document.getElementById('foodOther');
+      const currentCategory = () => donateForm.querySelector('[data-category].on')?.dataset.category || 'prepared';
+
+      // The item list follows the category, and "Other" reveals a free-text box.
+      const paintCategory = () => {
+        const category = EcoFood.foodCategory(currentCategory());
+        EcoFood.fillFoodSelect(foodSelect, category.key);
+        foodHint.textContent = `${category.emoji} ${category.hint}`;
+        foodOtherField.hidden = true;
+        foodOther.value = '';
+      };
+      donateForm.querySelectorAll('[data-category]').forEach(button => button.addEventListener('click', () => {
+        donateForm.querySelectorAll('[data-category]').forEach(item => item.classList.toggle('on', item === button));
+        paintCategory();
+      }));
+      foodSelect?.addEventListener('change', () => {
+        const other = foodSelect.value === EcoFood.FOOD_OTHER;
+        foodOtherField.hidden = !other;
+        if (other) foodOther.focus({ preventScroll: true });
+      });
+      paintCategory();
+
+      donateForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!session) { showToast('Please sign in before creating a donation.'); return; }
+        const formData = new FormData(donateForm);
+        const category = currentCategory();
+        if (!category) { showToast('Choose a food category.'); return; }
+
+        const picked = formData.get('food');
+        const foodName = (picked === EcoFood.FOOD_OTHER ? (formData.get('food_other') || '') : (picked || '')).toString().trim();
+        if (!foodName) { showToast('Choose a food item from the list, or name it yourself.'); (picked === EcoFood.FOOD_OTHER ? foodOther : foodSelect).focus({ preventScroll: true }); return; }
+
+        // Coordinates are mandatory: they are what the map and the driver route use.
+        const spot = gpsFor('pickup');
+        if (!spot?.has()) {
+          showToast('Capture the exact pickup location before flagging this food.');
+          spot?.flag(); spot?.focus();
+          return;
+        }
+        const where = spot.value();
+
+        const submit = donateForm.querySelector('[type="submit"]');
+        submit.disabled = true;
+        const { error } = await sb.from('food_offers').insert({
+          donor_id: session.user.id,
+          city: profile.city,
+          category,
+          food_name: foodName,
+          quantity: Number(formData.get('quantity')),
+          unit: formData.get('unit'),
+          collect_by: formData.get('deadline'),
+          pickup_latitude: where.latitude,
+          pickup_longitude: where.longitude,
+          pickup_accuracy_m: where.accuracy_m,
+          pickup_landmark: formData.get('pickup_landmark') || null,
+          donor_notes: formData.get('donor_notes') || null
+        });
+        submit.disabled = false;
+        if (error) { showToast(error.message); return; }
+        spot.stop();
+        donateForm.reset();
+        showToast('Donation published with its exact pickup point.');
+        renderView('donations');
+      });
+    }
+    const claimOfferForm = document.getElementById('claimOfferForm');
+    claimOfferForm?.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!session || !claimOffer) return;
+      const formData = new FormData(claimOfferForm);
+      const phone = (formData.get('phone') || '').toString().trim();
+      if (phone.replace(/\D/g, '').length < 8) { showToast('Add a phone number the donor can reach you on.'); return; }
+      const drop = gpsFor('dropoff');
+      if (!drop?.has()) { showToast('Capture the exact drop-off location so the delivery can be tracked.'); drop?.flag(); drop?.focus(); return; }
+      const dropAt = drop.value();
+      const submit = claimOfferForm.querySelector('[type="submit"]');
+      submit.disabled = true;
+      const { error } = await sb.from('food_offers').update({
+        status: 'claimed', recipient_id: session.user.id, claimed_at: new Date().toISOString(),
+        recipient_contact_name: formData.get('contact_name'), recipient_phone: phone,
+        pickup_address: formData.get('address'), pickup_mode: formData.get('pickup_mode'), pickup_notes: formData.get('notes') || null,
+        dropoff_latitude: dropAt.latitude, dropoff_longitude: dropAt.longitude, dropoff_accuracy_m: dropAt.accuracy_m
+      }).eq('id', claimOffer.id).eq('status', 'open').is('recipient_id', null);
+      if (error) { showToast(error.message); submit.disabled = false; return; }
+      const pickupCopy = formData.get('pickup_mode') === 'driver' ? 'A driver request can now be arranged.' : 'The donor has your collection details.';
+      claimOffer = null;
+      showToast(`Food claimed. ${pickupCopy}`);
+      renderView('receives');
+    });
+    const profileForm = document.getElementById('profileForm');
+    if(profileForm){
+      // Country -> State -> District, pre-filled with what the profile already has.
+      const geo = setupGeoPicker(document.getElementById('geoBlock'));
+      void geo.setLocation({country:profile.country, state:profile.state, district:profile.district || profile.city});
+
+      // ---- profile photo --------------------------------------------------
+      const avatarInput = document.getElementById('avatarInput');
+      const avatarPreview = document.getElementById('avatarPreview');
+      const avatarNote = document.getElementById('avatarNote');
+      const avatarRemove = document.getElementById('avatarRemove');
+      const paintAvatar = url => {
+        avatarPreview.innerHTML = url ? `<img src="${escapeHtml(url)}" alt="">` : escapeHtml(initial);
+        avatarRemove.hidden = !url;
+        setHeaderAvatar(url);
+      };
+      avatarInput?.addEventListener('change', async () => {
+        const file = avatarInput.files?.[0];
+        if(!file) return;
+        if(file.size > 4 * 1024 * 1024){ avatarNote.textContent = 'That image is over 4 MB — pick a smaller one.'; return; }
+        if(!session){ avatarNote.textContent = 'Sign in to upload a photo.'; return; }
+        avatarNote.textContent = 'Uploading…';
+        // Extension is lower-cased so .JPG and .jpg behave the same.
+        const extension = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `${session.user.id}/avatar.${extension}`;
+        const { error: uploadError } = await sb.storage.from('avatars')
+          .upload(path, file, { upsert: true, contentType: file.type, cacheControl: '3600' });
+        if(uploadError){ avatarNote.textContent = uploadError.message; return; }
+        const { data } = sb.storage.from('avatars').getPublicUrl(path);
+        // Cache-buster so a replaced photo shows immediately.
+        profile.avatar_url = `${data.publicUrl}?v=${Date.now()}`;
+        await sb.from('profiles').update({ avatar_url: profile.avatar_url }).eq('id', session.user.id);
+        paintAvatar(profile.avatar_url);
+        avatarNote.textContent = 'Photo updated.';
+      });
+      avatarRemove?.addEventListener('click', async () => {
+        profile.avatar_url = null;
+        paintAvatar(null);
+        avatarNote.textContent = 'Photo removed.';
+        if(session) await sb.from('profiles').update({ avatar_url: null }).eq('id', session.user.id);
+      });
+
+      void loadAlerts();
+
+      profileForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const formData = new FormData(profileForm);
+        const place = geo.value();
+        const missing = geo.firstMissing();
+        if(missing){ showToast(`Choose your ${missing.label} so EcoBite can match food nearby.`); geo.flag(missing.level); geo.focus(missing.level); return; }
+        const first = (formData.get('first_name') || '').trim();
+        const last = (formData.get('last_name') || '').trim();
+        if(!first){ showToast('Add your first name so the dashboard can greet you.'); profileForm.querySelector('[name="first_name"]').focus(); return; }
+
+        Object.assign(profile, {
+          first_name: first,
+          last_name: last,
+          full_name: [first, last].filter(Boolean).join(' '),
+          phone: (formData.get('phone') || '').trim(),
+          address_line1: (formData.get('address_line1') || '').trim(),
+          address_line2: (formData.get('address_line2') || '').trim(),
+          landmark: (formData.get('landmark') || '').trim(),
+          pincode: (formData.get('pincode') || '').trim(),
+          role: formData.get('role') || profile.role,
+          country: place.country,
+          state: place.state,
+          district: place.district,
+          // `city` stays in sync with the district: matching and alerts use it.
+          city: place.district,
+          notify_in_app: formData.get('notify_in_app') === 'on',
+          notify_email: formData.get('notify_email') === 'on',
+          latitude: formData.get('latitude') ? Number(formData.get('latitude')) : null,
+          longitude: formData.get('longitude') ? Number(formData.get('longitude')) : null,
+          location_accuracy_m: formData.get('location_accuracy_m') ? Number(formData.get('location_accuracy_m')) : null
+        });
+
+        ['sideCity','topCity'].forEach(id => document.getElementById(id).textContent = profile.city);
+        ['sideName','topName'].forEach(id => document.getElementById(id).textContent = profile.full_name);
+        const names = {donor:'Food donor',org:'Receiving organisation',driver:'Volunteer driver'};
+        ['sideRole','topRole'].forEach(id => document.getElementById(id).textContent = names[profile.role] || 'EcoBite member');
+
+        if(profile.notify_in_app) void askNotificationPermission();
+
+        if(session){
+          const { error } = await sb.from('profiles').update({
+            full_name: profile.full_name, first_name: profile.first_name, last_name: profile.last_name,
+            phone: profile.phone, address_line1: profile.address_line1, address_line2: profile.address_line2,
+            landmark: profile.landmark, pincode: profile.pincode, role: profile.role,
+            country: profile.country, state: profile.state, district: profile.district, city: profile.city,
+            notify_in_app: profile.notify_in_app, notify_email: profile.notify_email,
+            latitude: profile.latitude, longitude: profile.longitude, location_accuracy_m: profile.location_accuracy_m
+          }).eq('id', session.user.id);
+          if(error){ showToast(error.message); return; }
+          watchNearbyAlerts();
+        }
+        showToast('Profile saved.');
+      });
+    }
+    document.getElementById('settingsForm')?.addEventListener('submit', event => { event.preventDefault(); showToast('Rescue preferences saved.'); });
+  };
+  const loadNetwork = async () => {
+    const target = document.getElementById('networkResults'); if(!target) return;
+    try {
+      if(profile.role === 'org') {
+        const data = await ecoApi(`/v1/network/donors?city=${encodeURIComponent(profile.city)}&q=`);
+        target.innerHTML = data.donors.length ? `<div class="offer-list">${data.donors.map(d => `<article class="offer-row"><span><h3>${escapeHtml(d.name)}</h3><span class="where">${escapeHtml([d.org_kind,d.city].filter(Boolean).join(' · '))}</span></span><button class="btn btn-leaf btn-sm" data-donor="${d.id}" data-donor-name="${escapeHtml(d.name)}">Request delivery</button></article>`).join('')}</div>` : '<p class="empty-note">No registered donors found in this city yet.</p>';
+        target.querySelectorAll('[data-donor]').forEach(button => button.addEventListener('click', () => { const form=document.getElementById('deliveryRequestForm'); form.hidden=false; form.elements.donor_id.value=button.dataset.donor; document.getElementById('selectedDonor').textContent=`Delivery request for ${button.dataset.donorName}`; form.scrollIntoView({block:'center',behavior:'smooth'}); }));
+        document.getElementById('deliveryRequestForm')?.addEventListener('submit', async event => { event.preventDefault(); const f=new FormData(event.currentTarget); if(!f.get('pickup_latitude') || !f.get('dropoff_latitude')){ showToast('Capture both the pickup and destination coordinates first.'); return; } try { await ecoApi('/v1/deliveries',{method:'POST',body:JSON.stringify({donor_id:f.get('donor_id'),pickup:{latitude:+f.get('pickup_latitude'),longitude:+f.get('pickup_longitude')},dropoff:{latitude:+f.get('dropoff_latitude'),longitude:+f.get('dropoff_longitude')},delivery_mode:f.get('delivery_mode'),offered_amount:f.get('offered_amount') ? +f.get('offered_amount') : null,food_summary:f.get('food_summary'),notes:f.get('notes')})}); showToast('Delivery request created.'); renderView('routing'); } catch(e){showToast(e.message);} });
+      } else if(profile.role === 'donor') {
+        const load=async()=>{const mode=document.getElementById('driverMode').value; const data=await ecoApi(`/v1/network/drivers?city=${encodeURIComponent(profile.city)}&mode=${mode}`); target.innerHTML=data.drivers.length?`<div class="offer-list">${data.drivers.map(d=>`<article class="offer-row"><span><h3>${escapeHtml(d.full_name)}</h3><span class="where">${escapeHtml(d.transport || 'Driver')} · ${d.delivery_mode} · ${d.base_fee ?? 'No fee'}</span></span></article>`).join('')}</div>`:'<p class="empty-note">No available drivers match this option.</p>';}; await load(); document.getElementById('driverMode').addEventListener('change',()=>void load());
+      } else {
+        const data=await ecoApi(`/v1/deliveries/open?city=${encodeURIComponent(profile.city)}`); target.innerHTML=data.deliveries.length?`<div class="offer-list">${data.deliveries.map(j=>`<article class="offer-row"><span><h3>${escapeHtml(j.donor_name)} → ${escapeHtml(j.receiver_name)}</h3><span class="where">${escapeHtml(j.food_summary || 'Food delivery')} · ${j.delivery_mode}${j.offered_amount ? ` · ${j.offered_amount}` : ''}</span></span><button class="btn btn-leaf btn-sm" data-claim="${j.id}">Claim</button></article>`).join('')}</div>`:'<p class="empty-note">No open delivery jobs in your city.</p>'; target.querySelectorAll('[data-claim]').forEach(b=>b.addEventListener('click',async()=>{try{await ecoApi(`/v1/deliveries/${b.dataset.claim}/claim`,{method:'POST'});showToast('Delivery claimed.');renderView('routing');}catch(e){showToast(e.message)}})); document.getElementById('driverPreferences')?.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{await ecoApi('/v1/drivers/me/preferences',{method:'PUT',body:JSON.stringify({service_city:f.get('service_city'),delivery_mode:f.get('delivery_mode'),base_fee:f.get('base_fee')?+f.get('base_fee'):null,max_distance_km:+f.get('max_distance_km'),is_available:f.get('is_available')==='on'})});showToast('Availability saved.')}catch(err){showToast(err.message)}});
+      }
+    } catch(error) { target.innerHTML=`<p class="empty-note">${escapeHtml(error.message)}</p>`; }
+  };
+  const loadDeliveries = async () => { const target=document.getElementById('deliveryRows'); if(!target) return; try { const data=await ecoApi('/v1/deliveries/mine'); target.innerHTML=data.deliveries.length?`<div class="offer-list">${data.deliveries.map(j=>`<article class="offer-row"><span><h3>${escapeHtml(j.donor_name)} → ${escapeHtml(j.receiver_name)}</h3><span class="where">${escapeHtml(j.food_summary || 'Food delivery')} · ${j.status}</span></span><button class="btn btn-outline btn-sm" data-route="${j.id}">View route</button>${(profile.role==='donor'||profile.role==='org')&&j.status!=='delivered'&&j.status!=='cancelled'?`<button class="btn btn-outline btn-sm" data-cancel="${j.id}">Cancel</button>`:''}${profile.role==='driver'&&j.driver_id===session.user.id&&j.status==='claimed'?`<button class="btn btn-leaf btn-sm" data-status="${j.id}" data-next="in_progress">Start</button>`:''}${profile.role==='driver'&&j.driver_id===session.user.id&&j.status==='in_progress'?`<button class="btn btn-leaf btn-sm" data-status="${j.id}" data-next="delivered">Deliver</button><button class="btn btn-outline btn-sm" data-track="${j.id}">Share GPS</button>`:''}</article>`).join('')}</div>`:'<p class="empty-note">No deliveries assigned to you yet.</p>'; target.querySelectorAll('[data-status]').forEach(b=>b.addEventListener('click',async()=>{try{await ecoApi(`/v1/deliveries/${b.dataset.status}/status`,{method:'POST',body:JSON.stringify({status:b.dataset.next})});showToast('Delivery updated.');void loadDeliveries();}catch(e){showToast(e.message)}})); target.querySelectorAll('[data-cancel]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Cancel this delivery request?'))return;try{await ecoApi(`/v1/deliveries/${b.dataset.cancel}/status`,{method:'POST',body:JSON.stringify({status:'cancelled'})});showToast('Delivery cancelled.');void loadDeliveries();}catch(e){showToast(e.message)}})); target.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>void showRoute(b.dataset.route))); target.querySelectorAll('[data-track]').forEach(b=>b.addEventListener('click',()=>{
+      // Driver side of the map: broadcasts GPS only while this delivery runs.
+      if(EcoTracking.sharing.watchId === null && !confirm('Share your live location with the donor and receiver until this delivery is complete?')) return;
+      const on = EcoTracking.shareLocation({
+        sb, ecoApi, session, jobId: b.dataset.track,
+        onUpdate: live => { b.textContent = live ? 'Stop sharing GPS' : 'Share GPS'; b.classList.toggle('btn-leaf', live); },
+        onError: message => showToast(message)
+      });
+      showToast(on ? 'Sharing your live location for this delivery.' : 'Location sharing stopped.');
+    })); }catch(error){target.innerHTML=`<p class="empty-note">${escapeHtml(error.message)}</p>`;} };
+  // ---- live delivery tracking (see live-tracking.js) ----------------------
+  let tracker = null;
+  const showRoute = async jobId => {
+    const panel = document.getElementById('routePanel');
+    panel.hidden = false;
+    if (tracker) tracker.stop();
+    tracker = new EcoTracking.DeliveryTracker({
+      sb, ecoApi, session, profile, jobId,
+      els: {
+        map: document.getElementById('routeMap'),
+        eta: document.getElementById('trackEta'),
+        stages: document.getElementById('trackStages'),
+        meta: document.getElementById('trackMeta')
+      }
+    });
+    document.getElementById('trackClose').onclick = () => { tracker?.stop(); tracker = null; panel.hidden = true; };
+    panel.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+    try { await tracker.start(); }
+    catch (error) { document.getElementById('trackEta').innerHTML = `<strong>Could not load tracking</strong><span>${escapeHtml(error.message)}</span>`; }
+  };
+  const escapeHtml = value => String(value).replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
+  const renderSearch = async query => {
+    const results = document.getElementById('searchResults');
+    const clean = query.trim().toLowerCase();
+    if(!clean){ results.classList.remove('show'); results.innerHTML = ''; return; }
+    const matches = SEARCH_INDEX.filter(item => `${item.title} ${item.meta} ${item.type}`.toLowerCase().includes(clean));
+    // Receivers get live donor results from the backend in the same existing
+    // search popover. Static dashboard results remain available if the API is
+    // not running yet or this is preview mode.
+    if(!preview && profile.role === 'org' && profile.city) {
+      try {
+        const data = await ecoApi(`/v1/network/donors?city=${encodeURIComponent(profile.city)}&q=${encodeURIComponent(clean)}`);
+        if(document.getElementById('globalSearch').value.trim().toLowerCase() !== clean) return;
+        data.donors.forEach(donor => matches.push({
+          type:'Registered donors', title:donor.name, meta:[donor.org_kind, donor.city].filter(Boolean).join(' · '), view:'receive'
+        }));
+      } catch(error) {
+        console.info('Live donor search is unavailable:', error.message);
+      }
+    }
+    if(!matches.length){ results.innerHTML = '<p class="empty-note">No offer, pickup, or location matched that search.</p>'; results.classList.add('show'); return; }
+    const groups = matches.reduce((all,item) => { (all[item.type] ||= []).push(item); return all; }, {});
+    results.innerHTML = Object.entries(groups).map(([type,items]) => `<div class="search-group"><strong>${escapeHtml(type)}</strong>${items.map(item => `<button class="search-result" data-search-view="${escapeHtml(item.view)}" data-search-target="${escapeHtml(item.target || '')}"><span><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.meta)}</span></span></button>`).join('')}</div>`).join('');
+    results.classList.add('show');
+    results.querySelectorAll('.search-result').forEach(button => button.addEventListener('click', () => { const view = button.dataset.searchView; const target = button.dataset.searchTarget; renderView(view); if(target) setTimeout(() => document.getElementById(target)?.scrollIntoView({block:'center',behavior:reduceMotion?'auto':'smooth'}), 60); results.classList.remove('show'); }));
+  };
+  document.getElementById('globalSearch').addEventListener('input', event => { void renderSearch(event.target.value); });
+  document.addEventListener('keydown', event => { if(event.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){ event.preventDefault(); document.getElementById('globalSearch').focus(); } if(event.key === 'Escape') document.getElementById('searchResults').classList.remove('show'); });
+  document.addEventListener('click', event => { if(!event.target.closest('.search-wrap')) document.getElementById('searchResults').classList.remove('show'); });
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('mobileMenu').addEventListener('click', event => { const open = sidebar.classList.toggle('is-open'); event.currentTarget.setAttribute('aria-expanded', String(open)); });
+  document.querySelectorAll('.side-link[data-view]').forEach(button => button.addEventListener('click', () => { sidebar.classList.remove('is-open'); document.getElementById('mobileMenu').setAttribute('aria-expanded','false'); renderView(button.dataset.view); }));
+  document.getElementById('signOutLink').addEventListener('click', async () => { if(session) await sb.auth.signOut(); window.location.href = 'index.html'; });
+  // ---- subtle pointer tilt on the AI cards, desktop-only, motion-safe ----
+  const canTilt = !reduceMotion && window.matchMedia('(pointer:fine)').matches;
+  if (canTilt) {
+    document.addEventListener('pointermove', event => {
+      const card = event.target.closest?.('.predict-card,.ai-note');
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width - .5;
+      const py = (event.clientY - rect.top) / rect.height - .5;
+      card.style.transform = `perspective(700px) rotateX(${(-py * 4).toFixed(2)}deg) rotateY(${(px * 4).toFixed(2)}deg) translateY(-2px)`;
+    });
+    document.addEventListener('pointerout', event => {
+      const card = event.target.closest?.('.predict-card,.ai-note');
+      if (card) card.style.transform = '';
+    });
+  }
+  renderView(currentView);
+  void loadWeatherSignal();
+})();
+</script>
+<script src="eco-motion.js"></script>
+</body>
+</html>

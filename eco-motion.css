@@ -1,0 +1,113 @@
+/* ============================================================
+   EcoBite — motion layer (extracted from the Kombai design file)
+   Load AFTER app.css so these rules win. Respects
+   prefers-reduced-motion universally.
+   ============================================================ */
+:root{ --eco-ease:cubic-bezier(.2,.8,.2,1); }
+
+/* ---------- page entrance / exit transitions ---------- */
+@keyframes ecoPageIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+body{ animation:ecoPageIn .5s var(--eco-ease) both; }
+body.eco-page-out{ opacity:0; transition:opacity .22s ease; }
+
+/* ---------- buttons: lift + bloom + squash + shimmer + glow ---------- */
+.btn{ will-change:transform; }
+.btn:hover:not(:active):not(:disabled){ transform:translateY(-2px) scale(1.015); }
+.btn:active{ transform:translateY(1px) scale(.96); }
+.btn-primary{ animation:ecoGlow 3.2s ease-in-out infinite; }
+@keyframes ecoGlow{
+  0%,100%{ box-shadow:0 12px 25px -17px rgba(242,153,74,.95); }
+  50%{ box-shadow:0 16px 36px -14px rgba(242,153,74,1),0 0 0 5px rgba(242,153,74,.08); }
+}
+.btn-primary::after,.btn-leaf::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(110deg,transparent 32%,rgba(255,255,255,.45) 50%,transparent 68%);
+  transform:translateX(-130%); transition:transform .75s ease;
+}
+.btn-primary:hover::after,.btn-leaf:hover::after{ transform:translateX(130%); }
+.btn .spinner{ animation:ecoSpin .7s linear infinite; }
+@keyframes ecoSpin{ to{ transform:rotate(360deg); } }
+
+/* ---------- reveals (staggered rise) ---------- */
+[data-reveal],.eco-reveal{ opacity:0; transform:translateY(18px); }
+[data-reveal].is-in,.eco-reveal.is-in{
+  opacity:1; transform:none;
+  transition:opacity .8s var(--eco-ease) var(--d,0ms), transform .8s var(--eco-ease) var(--d,0ms);
+}
+
+/* ---------- typing ---------- */
+.typing-cursor{ display:inline-block; width:2px; height:.9em; margin-left:6px;
+  vertical-align:-.06em; background:var(--leaf); animation:ecoBlink 1s steps(1,end) infinite; }
+@keyframes ecoBlink{ 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+
+/* ---------- form fields ---------- */
+.field,.geo-field{ position:relative; }
+.field>span{ transition:color .22s ease; }
+.field:focus-within>span{ color:var(--ink); }
+input:focus,select:focus,textarea:focus{ transform:translateY(-1px); }
+.password-field:focus-within input,.signin-pw-wrap:focus-within input{ letter-spacing:.14em; }
+
+/* ---------- chips / category choices bounce ---------- */
+.chip input:checked+span{ animation:ecoPop .35s var(--eco-ease); }
+.category-choice.on{ animation:ecoPick .4s var(--eco-ease); }
+@keyframes ecoPick{ 0%{transform:translateY(-2px) scale(.9);} 60%{transform:translateY(-3px) scale(1.06);} 100%{transform:translateY(-2px) scale(1);} }
+
+/* ---------- map pins: drop + bounce in ---------- */
+.eco-pin{ animation:ecoPinDrop .55s var(--eco-ease) both; transform-origin:50% 90%; }
+@keyframes ecoPinDrop{
+  0%{ opacity:0; transform:rotate(-45deg) translateY(-18px) scale(.85); }
+  60%{ opacity:1; transform:rotate(-45deg) translateY(3px) scale(1.05); }
+  80%{ transform:rotate(-45deg) translateY(-2px) scale(.98); }
+  100%{ opacity:1; transform:rotate(-45deg); }
+}
+.leaflet-marker-icon{ transition:transform .5s var(--eco-ease); }
+
+/* ---------- driver marker / live badge pulse ---------- */
+.eco-driver-pulse{ animation:ecoPulse 1.8s ease-in-out infinite; }
+@keyframes ecoPulse{ 0%,100%{opacity:1; box-shadow:0 0 0 0 rgba(242,153,74,.45);} 50%{opacity:.55; box-shadow:0 0 0 9px rgba(242,153,74,0);} }
+
+/* ---------- checkmark draw-in ---------- */
+.eco-check circle{ stroke-dasharray:64; stroke-dashoffset:64; animation:ecoDraw .55s ease .1s forwards; }
+.eco-check path{ stroke-dasharray:24; stroke-dashoffset:24; animation:ecoDraw .4s ease .5s forwards; }
+@keyframes ecoDraw{ to{ stroke-dashoffset:0; } }
+
+/* ---------- leaf-fall micro animation ---------- */
+.eco-leaf{ position:absolute; display:block; width:11px; height:20px; border-radius:100% 0 100% 0;
+  opacity:0; animation:ecoLeafFall 1.5s var(--eco-ease) both; pointer-events:none; }
+@keyframes ecoLeafFall{
+  0%{ opacity:0; transform:translateY(-22px) rotate(-30deg) scale(.6); }
+  20%{ opacity:.85; }
+  100%{ opacity:0; transform:translateY(90px) rotate(40deg) scale(1); }
+}
+
+/* ---------- route / ribbon draw-on ---------- */
+.route-stroke{ stroke-dasharray:900; stroke-dashoffset:900; animation:ecoDraw 1.3s var(--eco-ease) .4s forwards; }
+.rescue-ribbon{ stroke-dasharray:1250; stroke-dashoffset:1250; animation:ecoDraw 1.2s var(--eco-ease) 1.3s forwards; }
+
+/* ---------- stage progress fill ---------- */
+.stage-fill{ transform:scaleX(0); transform-origin:left center; animation:ecoFill .8s var(--eco-ease) .9s forwards; }
+@keyframes ecoFill{ to{ transform:scaleX(1); } }
+
+/* ---------- skeleton shimmer ---------- */
+.skeleton{ background:linear-gradient(90deg,rgba(210,232,198,.55),rgba(240,248,235,.95),rgba(210,232,198,.55));
+  background-size:200% 100%; animation:ecoShimmer 1.6s ease-in-out infinite; }
+@keyframes ecoShimmer{ 0%{background-position:120% 0;} 100%{background-position:-120% 0;} }
+
+/* ---------- card hover polish ---------- */
+.sheet,.form-sheet,.ai-note,.predict-card,.offer-row,.route-ticket{
+  transition:transform .3s var(--eco-ease), box-shadow .3s ease, border-color .25s ease, background .25s ease;
+}
+
+/* ---------- universal reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  body{ animation:none; }
+  .btn-primary{ animation:none; }
+  .btn-primary::after,.btn-leaf::after{ display:none; }
+  .btn:hover:not(:active):not(:disabled){ transform:none; }
+  [data-reveal],.eco-reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+  .typing-cursor{ animation:none; opacity:0; }
+  .eco-pin{ animation:none; }
+  .eco-check circle,.eco-check path,.route-stroke,.rescue-ribbon,.stage-fill{ animation:none; stroke-dashoffset:0; transform:none; }
+  .eco-leaf,.eco-driver-pulse,.skeleton{ animation:none; }
+  .chip input:checked+span,.category-choice.on{ animation:none; }
+}
